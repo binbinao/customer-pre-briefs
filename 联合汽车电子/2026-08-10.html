@@ -13,6 +13,10 @@
     --gray-500: #87867F; --gray-700: #3D3D3A;
     --border: 1.5px solid var(--gray-300);
     --radius: 12px;
+    --r-sm: 8px;     /* dim-card / tl-item / quote-banner */
+    --r-md: 14px;    /* visit-card / sec-body li 重点卡 */
+    --r-lg: 18px;    /* visit-card 当前已 14, 保留 */
+    --r-pill: 999px; /* meta-item / btn */
     --ease: cubic-bezier(0.16, 1, 0.3, 1);
     --dur-fast: 150ms;
     --dur-base: 250ms;
@@ -93,7 +97,7 @@
 
   /* paragraphs */
   .md-p { margin-bottom:10px; color:var(--gray-700); }
-  .md-p strong { color:var(--text); font-weight:600; }
+  .md-p strong, .tl-event strong, .visit-text strong, .dim-val strong { color:var(--text); font-weight:600; }
 
   /* md links */
   .md-link { color:var(--sky); text-decoration:none; border-bottom:1px solid rgba(91,139,160,.3); transition:all .15s; }
@@ -154,11 +158,14 @@
 
   /* visit list (§4) */
   .visit-list { list-style:none; padding:0; margin:0; counter-reset:visit; }
-  .visit-card { display:grid; grid-template-columns:60px 1fr; gap:14px; padding:14px 16px;
-                 margin-bottom:10px; border-radius:10px; background:linear-gradient(135deg, rgba(217,119,87,.06), rgba(217,119,87,.02));
-                 border:1.5px solid rgba(217,119,87,.3); position:relative; }
-  .visit-card:hover { border-color:var(--clay); box-shadow:0 2px 8px rgba(217,119,87,.1); }
-  .visit-num { font-family:"Georgia",serif; font-size:32px; font-weight:700; color:var(--clay); line-height:1; padding-top:2px; }
+  .visit-card { display:grid; grid-template-columns:60px 1fr; gap:14px; padding:16px 18px;
+                 margin-bottom:12px; border-radius:14px;
+                 background:linear-gradient(135deg, rgba(217,119,87,.14), rgba(217,119,87,.04));
+                 border:2px solid rgba(217,119,87,.45);
+                 box-shadow:0 4px 14px rgba(217,119,87,.08);
+                 position:relative; transition:transform var(--dur-fast) var(--ease), box-shadow var(--dur-fast) var(--ease); }
+  .visit-card:hover, .visit-card:focus-within { border-color:var(--clay); box-shadow:0 8px 22px rgba(217,119,87,.18); transform:translateY(-1px); }
+  .visit-num { font-family:"Georgia",serif; font-size:42px; font-weight:700; color:var(--clay); line-height:1; padding-top:2px; letter-spacing:-.02em; }
   .visit-body { color:var(--text); }
   .visit-title { font-weight:600; font-size:15px; color:var(--text); margin-bottom:6px; }
   .visit-text { font-size:13.5px; color:var(--gray-700); line-height:1.7; }
