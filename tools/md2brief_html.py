@@ -414,10 +414,82 @@ def classify_category(cat: str) -> str:
 
 
 # ---------------- 完整页面模板 ----------------
-def render_page(body_html: str, title: str, meta: dict, toc: "list[tuple[str, str, str]]", source_date: str, source_slug: str) -> str:
+def classify_customer_industry(name: str) -> tuple[str, str, str]:
+    """简易关键词匹配: 返回 (industry_key, emoji, label)"""
+    n = name.lower()
+    if any(k in n for k in ("汽车", "车", "汽")):
+        return ("auto", "🚗", "汽车 Tier 1")
+    if any(k in n for k in ("芯", "半导", "ic")):
+        return ("chip", "🔌", "芯片 / 半导体")
+    if any(k in n for k in ("电池", "能源", "锂", "光伏")):
+        return ("energy", "⚡", "能源 / 电池")
+    return ("other", "🏢", "其他客户")
+
+
+def build_customer_nav(root_dir: Path, current_slug: str, current_date: str) -> str:
+    """扫 root_dir 下的客户子目录, 按行业分组渲染导航, 当前简报对应客户 .active"""
+    if not root_dir.is_dir():
+        return ""
+    customers: list[dict] = []
+    for entry in sorted(root_dir.iterdir(), key=lambda p: p.name):
+        if not entry.is_dir() or entry.name.startswith(".") or entry.name in ("tools", ".git"):
+            continue
+        # 找最新的简报日期
+        dates = sorted(
+            [p.stem for p in entry.iterdir()
+             if p.is_file() and re.match(r"^\d{4}-\d{2}-\d{2}\.md$", p.name)],
+            reverse=True,
+        )
+        if not dates:
+            continue
+        latest = dates[0]
+        ind_key, ind_emoji, ind_label = classify_customer_industry(entry.name)
+        customers.append({
+            "slug": entry.name,
+            "name": entry.name,
+            "industry_key": ind_key,
+            "industry_emoji": ind_emoji,
+            "industry_label": ind_label,
+            "latest": latest,
+            "active": (entry.name == current_slug and latest == current_date),
+        })
+    if not customers:
+        return ""
+    # 按行业分组 (顺序: auto, chip, energy, other)
+    order = [("auto", "🚗", "汽车 Tier 1"),
+             ("chip", "🔌", "芯片 / 半导体"),
+             ("energy", "⚡", "能源 / 电池"),
+             ("other", "🏢", "其他客户")]
+    parts: list[str] = []
+    for ind_key, ind_emoji, ind_label in order:
+        in_group = [c for c in customers if c["industry_key"] == ind_key]
+        if not in_group:
+            continue
+        parts.append(f'<div class="nav-group-label">{ind_emoji} {html.escape(ind_label)}</div>')
+        parts.append('<ul class="nav-list">')
+        for c in in_group:
+            cls = "nav-link active" if c["active"] else "nav-link"
+            aria = ' aria-current="page"' if c["active"] else ""
+            href = f"/customer-pre-briefs/{urllib.parse.quote(c['slug'])}/{c['latest']}.html"
+            parts.append(
+                f'<li><a class="{cls}"{aria} href="{href}">'
+                f'<span class="nav-emoji">{ind_emoji}</span>'
+                f'<span class="nav-name">{html.escape(c["name"])}</span>'
+                f'<span class="nav-date">{html.escape(c["latest"])}</span>'
+                f'</a></li>'
+            )
+        parts.append('</ul>')
+    return "".join(parts)
+
+
+def render_page(body_html: str, title: str, meta: dict, toc: "list[tuple[str, str, str]]",
+                source_date: str, source_slug: str, root_dir: Path | None = None) -> str:
     """meta: {生成时间, 调研档位, 有效期, 上一次调研, 主体确认}"""
     meta_block = render_meta_block(meta)
     toc_block = render_toc(toc)
+    if root_dir is None:
+        root_dir = Path(__file__).resolve().parent.parent
+    customer_nav_html = build_customer_nav(root_dir, source_slug, source_date)
 
     css = build_css()
 
@@ -445,6 +517,22 @@ def render_page(body_html: str, title: str, meta: dict, toc: "list[tuple[str, st
   </div>
 </header>
 
+<aside class="sidebar" aria-label="详情页导航">
+  <div class="sidebar-inner">
+    <section class="sidebar-block sidebar-toc">
+      <div class="sidebar-label">📑 章节</div>
+      {toc_block}
+    </section>
+    <section class="sidebar-block sidebar-nav">
+      <div class="sidebar-label">📂 客户导航</div>
+      {customer_nav_html}
+    </section>
+    <section class="sidebar-block sidebar-back">
+      <a class="sidebar-back-link" href="https://binbinao.github.io/customer-pre-briefs/">🔙 返回主页</a>
+    </section>
+  </div>
+</aside>
+
 <nav class="toc-rail" aria-label="目录">
   <div class="toc-rail-inner">
     <div class="toc-label">目录</div>
@@ -466,7 +554,7 @@ def render_page(body_html: str, title: str, meta: dict, toc: "list[tuple[str, st
 // scroll-spy for TOC — 联动 .active class + aria-current="location"
 (function(){{
   const secs = document.querySelectorAll('.brief-section');
-  const links = document.querySelectorAll('.toc-rail a');
+  const links = document.querySelectorAll('.toc-rail a, .sidebar-toc a');
   function spy(){{
     const y = window.scrollY + 120;
     let active = null;
@@ -709,8 +797,108 @@ def build_css() -> str:
     .dim-card {{ grid-template-columns:100px 1fr 160px; }}
     .toc-rail {{ width:min(200px, 22vw); }}
   }}
+
+  /* ===========================
+   * 桌面 ≥1024px: 左右两栏布局
+   * =========================== */
+  @media (min-width:1024px) {{
+    .page {{ max-width:1180px; display:grid; grid-template-columns:320px 1fr; column-gap:40px; row-gap:0; align-items:start; padding-top:8px; }}
+    .brief-header {{ grid-column:1/-1; }}
+    .brief-body {{ grid-column:2; max-width:760px; min-width:0; }}
+
+    /* 桌面隐藏右侧浮动 TOC (章节搬到左侧 sidebar) */
+    .toc-rail {{ display:none; }}
+
+    /* sidebar 在桌面独占左列 */
+    .sidebar {{
+      grid-column:1;
+      position:sticky;
+      top:24px;
+      align-self:start;
+      max-height:calc(100vh - 48px);
+      overflow-y:auto;
+      padding-right:4px;
+      margin-bottom:32px;
+    }}
+    .sidebar-inner {{
+      display:flex;
+      flex-direction:column;
+      gap:18px;
+    }}
+    .sidebar-block {{
+      background:var(--card);
+      border:var(--border);
+      border-radius:var(--radius);
+      padding:14px 14px;
+    }}
+    .sidebar-label {{
+      font-size:11px;
+      color:var(--gray-500);
+      text-transform:uppercase;
+      letter-spacing:.15em;
+      margin-bottom:10px;
+      padding:0 4px;
+      font-weight:600;
+    }}
+
+    /* 章节 toc-link (复用现有样式, 在 sidebar 内显示) */
+    .sidebar-toc .toc-link {{ display:flex; }}
+
+    /* 客户导航 */
+    .sidebar-nav .nav-group-label {{
+      font-size:11px;
+      color:var(--gray-700);
+      font-weight:600;
+      letter-spacing:.04em;
+      padding:6px 6px 4px;
+      margin-top:4px;
+    }}
+    .sidebar-nav .nav-list {{ list-style:none; padding:0; margin:0 0 4px; }}
+    .sidebar-nav .nav-list li {{ margin:0; }}
+    .nav-link {{
+      display:grid;
+      grid-template-columns:18px 1fr auto;
+      align-items:center;
+      gap:8px;
+      padding:7px 8px;
+      border-radius:8px;
+      font-size:13px;
+      color:var(--gray-700);
+      text-decoration:none;
+      transition:all .15s;
+    }}
+    .nav-link:hover {{ background:var(--gray-100); color:var(--text); }}
+    .nav-link.active {{ background:rgba(217,119,87,.12); color:var(--clay); font-weight:600; }}
+    .nav-link.active .nav-emoji {{ filter:drop-shadow(0 0 1px rgba(217,119,87,.5)); }}
+    .nav-emoji {{ font-size:14px; }}
+    .nav-name {{ overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }}
+    .nav-date {{ font-family:monospace; font-size:11px; color:var(--gray-500); }}
+
+    /* 返回主页块 */
+    .sidebar-back {{ padding:10px 12px; }}
+    .sidebar-back-link {{
+      display:flex; align-items:center; justify-content:center;
+      gap:6px;
+      padding:10px 14px;
+      background:var(--bg);
+      border:1.5px solid var(--gray-300);
+      border-radius:10px;
+      color:var(--gray-700);
+      font-size:13px;
+      font-weight:500;
+      text-decoration:none;
+      transition:all .15s;
+    }}
+    .sidebar-back-link:hover {{ border-color:var(--clay); color:var(--clay); background:var(--gray-100); }}
+
+    /* footer 跨两列 */
+    .brief-foot {{ grid-column:1/-1; }}
+  }}
+
   /* 移动端: toc-rail 改为底部固定 tab bar (不再 display:none) */
   @media (max-width:820px) {{
+    /* 桌面 sidebar 在移动端隐藏 */
+    .sidebar {{ display:none; }}
     .toc-rail {{
       position:fixed; top:auto; bottom:0; left:0; right:0;
       width:100%; max-width:100vw; margin:0; padding:8px;
