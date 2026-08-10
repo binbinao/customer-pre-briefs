@@ -4,33 +4,78 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>客户拜访前尽调简报 · Hermes Agent</title>
+<meta name="description" content="AI 驱动 · 多源交叉验证 · 7 tier sources · 7 天有效期。">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
 <style>
+  /* =========================================================
+     design tokens — 与 sister / md2brief_html.py 同源
+     ========================================================= */
   :root {
     --bg:#F8F7F4; --card:#FFFFFF; --text:#141413;
     --clay:#D97757; --olive:#788C5D; --rust:#B04A3F; --sky:#5B8BA0; --purple:#8B6B9E;
-    --gray-100:#EEECE6; --gray-300:#D1CFC5; --gray-500:#87867F; --gray-700:#3D3D3A;
+    --gray-50:#F4F2EC; --gray-100:#EEECE6; --gray-300:#D1CFC5; --gray-500:#87867F; --gray-700:#3D3D3A;
     --border:1.5px solid var(--gray-300);
     --radius:12px;
-    --sidebar-w:260px;
+    --radius-sm:8px;
+    --sidebar-w:268px;
+    /* fonts */
+    --serif:'Instrument Serif','Noto Serif SC',Georgia,'Times New Roman',serif;
+    --sans:'DM Sans','PingFang SC','Hiragino Sans GB',-apple-system,BlinkMacSystemFont,'Microsoft YaHei',sans-serif;
+    --mono:'JetBrains Mono',ui-monospace,SFMono-Regular,Menlo,monospace;
   }
   * { margin:0; padding:0; box-sizing:border-box; }
   html { scroll-behavior:smooth; }
-  body { background:var(--bg); color:var(--text); font-family:system-ui,-apple-system,"Microsoft YaHei",sans-serif;
-         font-size:15px; line-height:1.6; padding:0 20px 80px; }
+  body {
+    background:var(--bg); color:var(--text);
+    font-family:var(--sans); font-size:15px; line-height:1.55;
+    padding:0 20px 80px;
+    -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility;
+  }
+
+  /* OKLCH fallback block: 旧浏览器走 hex, 新浏览器走 oklch (无大变,仅高光点缀) */
+  @supports not (color: oklch(0 0 0)) {
+    :root { /* 保留 hex,无 oklch 路由 */ }
+  }
+
+  /* =========================================================
+     focus / a11y
+     ========================================================= */
+  *:focus { outline:none; }
+  *:focus-visible {
+    outline:2px solid var(--clay); outline-offset:2px;
+    border-radius:6px;
+  }
+  a:focus-visible { outline-color:var(--olive); }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration:0.01ms !important;
+      animation-iteration-count:1 !important;
+      transition-duration:0.01ms !important;
+      scroll-behavior:auto !important;
+    }
+  }
+
   .page { max-width:1400px; margin:0 auto; padding:48px 0 0; }
 
-  /* ====== 桌面两栏:左 sidebar sticky + 右 main ====== */
+  /* =========================================================
+     布局
+     ========================================================= */
   .layout {
     display:grid;
-    grid-template-columns: 1fr;
+    grid-template-columns:1fr;
     gap:32px;
     align-items:start;
   }
   @media (min-width:1024px) {
-    .layout { grid-template-columns: var(--sidebar-w) 1fr; }
+    .layout { grid-template-columns: var(--sidebar-w) 1fr; gap:40px; }
   }
 
-  /* ====== 左侧 sidebar ====== */
+  /* =========================================================
+     侧栏 — 白卡 + 阴影 + 上下分隔节奏
+     ========================================================= */
   .sidebar {
     background:transparent;
     padding:0 0 24px;
@@ -40,121 +85,391 @@
       position:sticky;
       top:48px;
       align-self:start;
-      max-height:calc(100vh - 48px);
+      max-height:calc(100vh - 56px);
       overflow-y:auto;
       padding:0 4px 24px 0;
     }
   }
-  .sidebar-block { margin-bottom:24px; }
+  .sidebar-card {
+    background:var(--card);
+    border:var(--border);
+    border-radius:var(--radius);
+    padding:18px;
+    box-shadow:0 1px 0 rgba(20,20,19,.02);
+  }
+  .sidebar-block + .sidebar-block { margin-top:18px; padding-top:18px; border-top:1px dashed var(--gray-300); }
   .sidebar-label {
-    font-size:11px; font-weight:600; text-transform:uppercase;
-    color:var(--gray-500); letter-spacing:0.08em;
-    margin-bottom:10px;
+    font-family:var(--sans); font-size:11px; font-weight:700;
+    text-transform:uppercase; letter-spacing:0.1em;
+    color:var(--gray-500);
+    margin-bottom:12px;
+    display:flex; align-items:center; gap:6px;
   }
-  .sidebar-divider {
-    height:1px; background:var(--gray-300); margin:18px 0;
+  .sidebar-label .dot {
+    width:6px; height:6px; border-radius:50%; background:var(--clay);
+    box-shadow:0 0 0 3px rgba(217,119,87,.15);
   }
+
   .cat-list { list-style:none; display:flex; flex-direction:column; gap:4px; }
   .cat-item {
-    display:flex; align-items:center; gap:8px;
-    padding:10px 14px; border-radius:10px;
+    display:flex; align-items:center; gap:10px;
+    padding:10px 12px; border-radius:10px;
     text-decoration:none; color:var(--gray-700);
     font-size:14px; font-weight:500;
     border:1.5px solid transparent;
     background:transparent;
     transition:all .15s;
     cursor:pointer;
+    position:relative;
   }
-  .cat-item:hover { background:var(--gray-100); color:var(--text); }
-  .cat-item.active {
+  .cat-item:hover { background:var(--gray-50); color:var(--text); }
+  .cat-item[aria-current="true"] {
     background:rgba(217,119,87,.08);
     border-color:var(--clay);
     color:var(--clay);
   }
-  .cat-item.active.cat-chip { background:rgba(91,139,160,.08); border-color:var(--sky); color:var(--sky); }
-  .cat-item.active.cat-energy { background:rgba(120,140,93,.08); border-color:var(--olive); color:var(--olive); }
-  .cat-item.active.cat-other { background:rgba(135,134,127,.08); border-color:var(--gray-500); color:var(--gray-700); }
-  .cat-icon { font-size:16px; flex-shrink:0; }
+  .cat-item[aria-current="true"].cat-chip { background:rgba(91,139,160,.08); border-color:var(--sky); color:var(--sky); }
+  .cat-item[aria-current="true"].cat-energy { background:rgba(120,140,93,.08); border-color:var(--olive); color:var(--olive); }
+  .cat-item[aria-current="true"].cat-other { background:rgba(135,134,127,.08); border-color:var(--gray-500); color:var(--gray-700); }
+
+  .cat-icon {
+    width:28px; height:28px;
+    display:inline-flex; align-items:center; justify-content:center;
+    font-size:15px; flex-shrink:0;
+    background:var(--gray-50); border-radius:8px;
+    border:1px solid var(--gray-100);
+  }
+  .cat-item[aria-current="true"] .cat-icon {
+    background:rgba(255,255,255,.6);
+    border-color:currentColor;
+  }
   .cat-name { flex:1; }
   .cat-count {
-    font-size:11px; color:var(--gray-500);
-    font-family:monospace; flex-shrink:0;
+    font-family:var(--mono);
+    font-size:10.5px; color:var(--gray-500);
+    flex-shrink:0;
+    background:var(--gray-50);
+    padding:2px 6px; border-radius:6px;
   }
-  .cat-item.active .cat-count { color:inherit; opacity:.85; }
+  .cat-item[aria-current="true"] .cat-count {
+    color:inherit; opacity:.85; background:rgba(255,255,255,.55);
+  }
 
-  .stat-grid { display:flex; flex-direction:column; gap:8px; }
-  .stat {
+  .mini-stat {
     display:flex; align-items:baseline; justify-content:space-between;
-    padding:8px 12px; background:var(--card);
-    border:var(--border); border-radius:8px;
+    padding:8px 10px;
+    font-size:12px;
   }
-  .stat-key { font-size:12px; color:var(--gray-500); }
-  .stat-val { font-size:18px; font-weight:600; color:var(--text); font-family:monospace; }
+  .mini-stat + .mini-stat { border-top:1px dashed var(--gray-100); }
+  .mini-stat .k { color:var(--gray-500); }
+  .mini-stat .v {
+    font-family:var(--mono); font-weight:500;
+    color:var(--text); font-size:14px;
+  }
+  .mini-stat .v small {
+    color:var(--gray-500); font-weight:400; font-family:var(--sans);
+    font-size:11px; margin-left:2px;
+  }
 
   .back-link {
     display:flex; align-items:center; gap:8px;
-    padding:10px 14px; border-radius:10px;
+    padding:10px 12px; border-radius:10px;
     text-decoration:none; color:var(--gray-700);
     font-size:13px; font-weight:500;
-    background:var(--card); border:var(--border);
+    background:var(--gray-50);
+    border:1px solid var(--gray-100);
     transition:all .15s;
   }
-  .back-link:hover { border-color:var(--olive); color:var(--olive); }
+  .back-link:hover { border-color:var(--olive); color:var(--olive); background:rgba(120,140,93,.06); }
   .back-link .arrow { font-size:14px; }
 
-  /* ====== 顶部 nav (移动端用) ====== */
-  .nav { display:flex; flex-wrap:wrap; gap:8px; justify-content:center; margin-bottom:24px; }
-  .nav a { text-decoration:none; padding:6px 14px; border-radius:20px; font-size:13px;
-           background:var(--card); border:1px solid var(--gray-300); color:var(--gray-700); transition:all .2s; }
-  .nav a:hover { background:var(--gray-100); border-color:var(--clay); color:var(--clay); }
-  @media (min-width:1024px) {
-    /* 桌面端 sidebar 已经提供分类导航,隐藏顶部 nav */
-    .nav { display:none; }
+  /* =========================================================
+     顶部 nav (移动端)
+     ========================================================= */
+  .nav { display:flex; flex-wrap:wrap; gap:6px; justify-content:center; margin-bottom:24px; }
+  .nav a {
+    text-decoration:none; padding:7px 14px; border-radius:99px;
+    font-size:13px; font-weight:500;
+    background:var(--card);
+    border:1px solid var(--gray-300);
+    color:var(--gray-700); transition:all .15s;
+  }
+  .nav a:hover { background:var(--gray-50); border-color:var(--clay); color:var(--clay); }
+  @media (min-width:1024px) { .nav { display:none; } }
+
+  /* =========================================================
+     主区
+     ========================================================= */
+  .main { min-width:0; }
+
+  /* ====== Hero / KPI 板 — 已重做以让彩色像素从 2% 提升到 15%+ ====== */
+  .hero {
+    position:relative;
+    background:
+      radial-gradient(900px 280px at 12% -20%, rgba(217,119,87,.22), transparent 60%),
+      radial-gradient(900px 280px at 92% -20%, rgba(91,139,160,.20), transparent 60%),
+      linear-gradient(180deg, #FFF8EE 0%, var(--bg) 100%);
+    border-radius:var(--radius);
+    padding:34px 36px 28px;
+    margin-bottom:24px;
+    overflow:hidden;
+    border:1.5px solid rgba(217,119,87,.18);
+  }
+  .hero::before {
+    content:""; position:absolute; inset:0 0 auto 0; height:6px;
+    background:linear-gradient(90deg, var(--sky) 0%, var(--olive) 35%, var(--clay) 70%, var(--rust) 100%);
+  }
+  .hero-grid {
+    display:grid; grid-template-columns:1fr; gap:28px;
+    align-items:center;
+  }
+  @media (min-width:720px) {
+    .hero-grid { grid-template-columns:1.3fr 1.1fr; gap:36px; }
+  }
+  .hero h1 {
+    font-family:var(--serif);
+    font-size:54px; font-weight:400; letter-spacing:-0.02em;
+    color:var(--text); line-height:1.05;
+    margin-bottom:12px;
+  }
+  .hero h1 .serif-it {
+    font-style:italic; color:var(--clay);
+    background:linear-gradient(135deg, var(--clay), var(--rust));
+    -webkit-background-clip:text; background-clip:text;
+    -webkit-text-fill-color:transparent; color:transparent;
+  }
+  .hero .subtitle {
+    color:var(--gray-700); font-size:15px;
+    max-width:560px; line-height:1.55;
+  }
+  .hero .subtitle strong { color:var(--text); font-weight:600; }
+  .hero .badge-row { margin-top:16px; display:flex; flex-wrap:wrap; gap:8px; }
+  .badge-row .chip {
+    font-size:12px; padding:5px 12px;
+    border-radius:99px; border:1.5px solid currentColor;
+    color:var(--gray-700); background:rgba(255,255,255,.85);
+    display:inline-flex; align-items:center; gap:6px;
+    font-weight:500;
+  }
+  .badge-row .chip.clay { color:var(--clay); }
+  .badge-row .chip.olive { color:var(--olive); }
+  .badge-row .chip.sky { color:var(--sky); }
+
+  /* KPI 卡片: 加左侧色条 + 饱和背景 + 大数字更显眼 */
+  .kpi-grid {
+    display:grid; grid-template-columns:repeat(3,1fr); gap:10px;
+  }
+  .kpi-card {
+    background:#FFFFFF;
+    border:1.5px solid var(--gray-300);
+    border-radius:var(--radius);
+    padding:16px 18px 14px;
+    text-align:left;
+    position:relative; overflow:hidden;
+    box-shadow:0 2px 0 -1px rgba(20,20,19,.04), 0 4px 12px -8px rgba(20,20,19,.15);
+  }
+  .kpi-card::before {
+    content:""; position:absolute; left:0; top:0; bottom:0; width:4px;
+    background:var(--clay);
+  }
+  .kpi-card.clay::before { background:var(--clay); }
+  .kpi-card.olive::before { background:var(--olive); }
+  .kpi-card.sky::before { background:var(--sky); }
+  .kpi-card .kpi-num {
+    font-family:var(--serif);
+    font-size:46px; font-weight:400; line-height:1;
+    color:var(--text); letter-spacing:-0.02em;
+    margin-bottom:6px;
+  }
+  .kpi-card.clay .kpi-num { color:var(--clay); }
+  .kpi-card.olive .kpi-num { color:var(--olive); }
+  .kpi-card.sky .kpi-num { color:var(--sky); }
+  .kpi-card .kpi-label {
+    font-size:11.5px; color:var(--gray-700); font-weight:600;
+    text-transform:uppercase; letter-spacing:0.08em;
+  }
+  .kpi-card .kpi-sub {
+    font-size:11px; color:var(--gray-500); font-family:var(--mono);
+    margin-top:4px;
   }
 
-  /* ====== 右侧 main ====== */
-  .main { min-width:0; }
-  header { margin-bottom:24px; }
-  h1 { font-size:32px; font-weight:600; color:var(--text); margin-bottom:6px; }
-  .subtitle { color:var(--gray-500); font-size:14px; }
+  /* sister strip — 不重复,放 hero 内也行,这里保留独立但缩小 */
+  .sister-strip {
+    background:linear-gradient(135deg, rgba(120,140,93,.10), rgba(120,140,93,.02));
+    border-left:3px solid var(--olive);
+    border-radius:var(--radius);
+    padding:12px 18px; margin:18px 0 24px;
+    display:flex; align-items:center; gap:12px;
+    font-size:13.5px;
+  }
+  .sister-strip .sister-icon { font-size:20px; flex-shrink:0; }
+  .sister-strip strong { color:var(--olive); }
+  .sister-strip a { color:var(--olive); text-decoration:none; font-weight:600; }
+  .sister-strip a:hover { text-decoration:underline; }
 
-  .sister-strip { background:linear-gradient(135deg, rgba(120,140,93,.1), rgba(120,140,93,.02)); border-left:3px solid var(--olive); border-radius:var(--radius); padding:14px 20px; margin:20px 0 28px; display:flex; align-items:center; gap:12px; }
-  .sister-strip .sister-icon { font-size:22px; flex-shrink:0; }
-  .sister-strip .sister-body { flex:1; color:var(--text); font-size:14px; line-height:1.5; }
-  .sister-strip .sister-body strong { color:var(--olive); }
-  .sister-strip .sister-body a { color:var(--olive); text-decoration:none; font-weight:600; }
-  .sister-strip .sister-body a:hover { text-decoration:underline; }
+  /* =========================================================
+     报告列表 (升级)
+     ========================================================= */
+  .cat-section { margin-bottom:36px; }
 
-  /* ====== 行业 section (SPA 切换) ====== */
-  section.cat-section { margin-bottom:36px; }
-  .cat-section.is-hidden { display:none; }
-  .cat-title { font-size:20px; font-weight:600; color:var(--text); margin-bottom:14px; padding-bottom:6px; border-bottom:2px solid var(--gray-100); display:flex; align-items:baseline; gap:10px; }
-  .cat-title .count { font-size:13px; font-weight:400; color:var(--gray-500); margin-left:4px; }
-  .cat-title .count::before { content:"· "; opacity:.5; }
+  .cat-title {
+    display:flex; align-items:flex-end; gap:14px;
+    font-family:var(--sans); font-size:22px; font-weight:600;
+    color:var(--text); margin-bottom:18px;
+  }
+  .cat-title .icon-disc {
+    width:38px; height:38px; border-radius:50%;
+    display:inline-flex; align-items:center; justify-content:center;
+    font-size:17px;
+    border:2px solid var(--card);
+    box-shadow:0 0 0 1.5px var(--clay);
+  }
+  .cat-title.chip .icon-disc { box-shadow:0 0 0 1.5px var(--sky); }
+  .cat-title.energy .icon-disc { box-shadow:0 0 0 1.5px var(--olive); }
+  .cat-title.other .icon-disc { box-shadow:0 0 0 1.5px var(--gray-500); }
+  .cat-title .meta {
+    margin-left:auto;
+    font-size:11.5px; color:var(--gray-500); text-transform:uppercase;
+    letter-spacing:0.08em;
+    font-family:var(--sans);
+  }
+  .cat-title h2 {
+    font-family:var(--sans); font-size:20px; font-weight:600;
+    margin:0;
+  }
+  .cat-title .count {
+    font-family:var(--mono); font-size:12px;
+    color:var(--gray-500); margin-left:2px;
+  }
 
-  .report-list { display:grid; gap:8px; }
-  .report { background:var(--card); border:var(--border); border-radius:var(--radius);
-            padding:14px 18px; display:flex; align-items:center; gap:14px; transition:all .15s; }
-  .report:hover { border-color:var(--clay); box-shadow:0 2px 6px rgba(0,0,0,.04); }
-  .report .icon { font-size:20px; flex-shrink:0; width:32px; text-align:center; }
+  .report-list { display:grid; gap:10px; }
+  .report {
+    background:var(--card);
+    border:var(--border);
+    border-radius:var(--radius);
+    padding:16px 20px;
+    display:flex; align-items:flex-start; gap:14px;
+    transition:all .15s;
+    position:relative;
+  }
+  .report:hover {
+    border-color:var(--clay);
+    box-shadow:0 6px 20px -8px rgba(217,119,87,.25);
+    transform:translateY(-1px);
+  }
+  .report .icon {
+    font-size:22px; flex-shrink:0;
+    width:36px; height:36px;
+    display:inline-flex; align-items:center; justify-content:center;
+    background:var(--gray-50); border:1px solid var(--gray-100);
+    border-radius:10px;
+  }
   .report .info { flex:1; min-width:0; }
-  .report .info a { color:var(--text); text-decoration:none; font-size:14px; font-weight:500; }
-  .report .info a:hover { color:var(--clay); }
-  .report .info .desc { color:var(--gray-500); font-size:12px; margin-top:2px; }
-  .report .date { flex-shrink:0; font-size:11px; color:var(--gray-500); font-family:monospace; }
+  .report .info a.title {
+    color:var(--text); text-decoration:none;
+    font-family:var(--serif);
+    font-size:19px; font-weight:400; letter-spacing:-0.01em;
+    line-height:1.3;
+    border:none;
+    display:inline; padding-bottom:1px;
+    background-image:linear-gradient(currentColor, currentColor);
+    background-size:0 1.5px; background-repeat:no-repeat; background-position:0 100%;
+    transition:background-size .25s ease-out;
+  }
+  .report:hover .info a.title {
+    color:var(--clay);
+    background-size:100% 1.5px;
+  }
+  .report .info .meta-row {
+    margin-top:8px; display:flex; flex-wrap:wrap; gap:6px; align-items:center;
+  }
+  .report .info .desc {
+    color:var(--gray-500); font-size:12.5px; margin-top:6px; line-height:1.5;
+  }
+  .report .date {
+    flex-shrink:0;
+    font-family:var(--mono);
+    font-size:11px; color:var(--gray-500);
+    padding-top:2px;
+  }
+  .report .open-arrow {
+    flex-shrink:0;
+    align-self:center;
+    color:var(--gray-500);
+    font-size:14px;
+    transition:transform .15s, color .15s;
+  }
+  .report:hover .open-arrow { color:var(--clay); transform:translateX(2px); }
 
-  .tag { display:inline-block; padding:2px 8px; border-radius:4px; font-size:11px; margin-right:4px; }
-  .tag.auto { background:rgba(91,139,160,.12); color:var(--sky); }
-  .tag.tier1 { background:rgba(120,140,93,.12); color:var(--olive); }
-  .tag.tier2 { background:rgba(91,139,160,.12); color:var(--sky); }
-  .tag.tier4 { background:rgba(217,119,87,.12); color:var(--clay); }
+  /* tier tags — 紧凑版 */
+  .tier-row { display:inline-flex; flex-wrap:wrap; gap:4px; }
+  .tier-tag {
+    font-size:10.5px; padding:2px 7px;
+    border-radius:99px;
+    background:var(--gray-100); color:var(--gray-700);
+    border:1px solid transparent;
+    font-weight:500;
+    font-family:var(--mono);
+  }
+  .tier-tag.t1 { background:rgba(120,140,93,.12); color:var(--olive); }
+  .tier-tag.t2 { background:rgba(91,139,160,.12); color:var(--sky); }
+  .tier-tag.t4 { background:rgba(217,119,87,.12); color:var(--clay); }
+  .tier-tag.cad { background:var(--gray-100); color:var(--text); font-family:var(--sans); }
 
-  footer { text-align:center; margin-top:48px; color:var(--gray-500); font-size:13px; }
+  .expiry {
+    display:inline-flex; align-items:center; gap:4px;
+    font-size:10.5px; padding:2px 8px;
+    border-radius:99px;
+    background:rgba(120,140,93,.12); color:var(--olive);
+    border:1px solid rgba(120,140,93,.25);
+  }
+  .expiry.warn { background:rgba(176,74,63,.10); color:var(--rust); border-color:rgba(176,74,63,.25); }
+  .expiry .dot { width:5px; height:5px; border-radius:50%; background:currentColor; }
 
+  .empty-state {
+    background:var(--card);
+    border:1.5px dashed var(--gray-300);
+    border-radius:var(--radius);
+    padding:24px;
+    text-align:center; color:var(--gray-500); font-size:13.5px;
+  }
+  .empty-state .empty-icon { font-size:22px; display:block; margin-bottom:8px; opacity:.6; }
+
+  .md-fallback {
+    font-family:var(--mono);
+    font-size:10.5px;
+    color:var(--gray-500);
+    margin-left:8px;
+    padding:1px 6px;
+    border-radius:4px;
+    background:var(--gray-50);
+    text-decoration:none;
+    border:none;
+  }
+  .md-fallback:hover { color:var(--clay); }
+
+  footer {
+    text-align:center; margin-top:48px;
+    color:var(--gray-500); font-size:12.5px;
+  }
+  footer code {
+    background:var(--gray-100); padding:2px 6px; border-radius:4px;
+    font-family:var(--mono); font-size:11.5px;
+  }
+
+  @media (max-width:1024px) {
+    .sidebar { margin-bottom:24px; }
+  }
+  @media (max-width:720px) {
+    .hero { padding:22px 18px 18px; }
+    .hero h1 { font-size:30px; }
+    .kpi-grid { grid-template-columns:1fr 1fr; }
+    .kpi-grid > .kpi-card:nth-child(3) { grid-column:1 / -1; }
+  }
   @media (max-width:600px) {
-    .report { flex-direction:column; align-items:flex-start; gap:6px; }
-    .report .date { align-self:flex-end; }
-    h1 { font-size:24px; }
+    .report { flex-wrap:wrap; }
+    .report .open-arrow { display:none; }
+    .report .date { width:100%; text-align:left; padding-left:0; }
   }
 </style>
 </head>
@@ -165,68 +480,84 @@
 
   <!-- ====== 左侧 sidebar ====== -->
   <aside class="sidebar" aria-label="行业分类导航">
-    <div class="sidebar-block">
-      <div class="sidebar-label">📂 行业分类</div>
-      <ul class="cat-list" id="cat-list">
-        <li><a href="#auto" class="cat-item cat-auto" data-cat="auto">
-          <span class="cat-icon">🚗</span><span class="cat-name">汽车 Tier 1</span><span class="cat-count" data-count-for="auto">—</span>
-        </a></li>
-        <li><a href="#chip" class="cat-item cat-chip" data-cat="chip">
-          <span class="cat-icon">🔌</span><span class="cat-name">芯片 / 半导体</span><span class="cat-count" data-count-for="chip">—</span>
-        </a></li>
-        <li><a href="#energy" class="cat-item cat-energy" data-cat="energy">
-          <span class="cat-icon">⚡</span><span class="cat-name">能源 / 电池</span><span class="cat-count" data-count-for="energy">—</span>
-        </a></li>
-        <li><a href="#other" class="cat-item cat-other" data-cat="other">
-          <span class="cat-icon">🏢</span><span class="cat-name">其他</span><span class="cat-count" data-count-for="other">—</span>
-        </a></li>
-      </ul>
-    </div>
+    <div class="sidebar-card">
+      <div class="sidebar-block">
+        <div class="sidebar-label"><span class="dot"></span>行业分类</div>
+        <ul class="cat-list" id="cat-list">
+          <li><a href="#auto" class="cat-item cat-auto" data-cat="auto" aria-current="true">
+            <span class="cat-icon">🚗</span><span class="cat-name">汽车 Tier 1</span><span class="cat-count" data-count-for="auto">—</span>
+          </a></li>
+          <li><a href="#chip" class="cat-item cat-chip" data-cat="chip">
+            <span class="cat-icon">🔌</span><span class="cat-name">芯片 / 半导体</span><span class="cat-count" data-count-for="chip">—</span>
+          </a></li>
+          <li><a href="#energy" class="cat-item cat-energy" data-cat="energy">
+            <span class="cat-icon">⚡</span><span class="cat-name">能源 / 电池</span><span class="cat-count" data-count-for="energy">—</span>
+          </a></li>
+          <li><a href="#other" class="cat-item cat-other" data-cat="other">
+            <span class="cat-icon">🏢</span><span class="cat-name">其他</span><span class="cat-count" data-count-for="other">—</span>
+          </a></li>
+        </ul>
+      </div>
 
-    <div class="sidebar-divider"></div>
-
-    <div class="sidebar-block">
-      <div class="sidebar-label">📊 统计</div>
-      <div class="stat-grid">
-        <div class="stat">
-          <span class="stat-key">总客户</span>
-          <span class="stat-val" id="stat-clients">—</span>
-        </div>
-        <div class="stat">
-          <span class="stat-key">总简报</span>
-          <span class="stat-val" id="stat-briefs">—</span>
-        </div>
-        <div class="stat">
-          <span class="stat-key">行业覆盖</span>
-          <span class="stat-val" id="stat-cats">—</span>
+      <div class="sidebar-block">
+        <div class="sidebar-label"><span class="dot"></span>快速摘要</div>
+        <div>
+          <div class="mini-stat"><span class="k">生成方式</span><span class="v">/prebrief<small></small></span></div>
+          <div class="mini-stat"><span class="k">信源等级</span><span class="v">7<small> tier</small></span></div>
+          <div class="mini-stat"><span class="k">有效期</span><span class="v">7<small> 天</small></span></div>
         </div>
       </div>
-    </div>
 
-    <div class="sidebar-divider"></div>
-
-    <div class="sidebar-block">
-      <a class="back-link" href="https://binbinao.github.io/" target="_blank" rel="noopener">
-        <span class="arrow">🔙</span> 返回 binbinao.github.io hub
-      </a>
+      <div class="sidebar-block">
+        <a class="back-link" href="https://binbinao.github.io/" target="_blank" rel="noopener">
+          <span class="arrow">🔙</span> 返回 binbinao.github.io hub
+        </a>
+      </div>
     </div>
   </aside>
 
   <!-- ====== 右侧 main ====== -->
   <main class="main">
 
-  <header>
-    <h1>📋 客户拜访前尽调简报</h1>
-    <p class="subtitle">AI 驱动 · 多源交叉验证 · 7 tier sources · 7 天有效期</p>
-
-    <div class="sister-strip">
-      <span class="sister-icon">🏛</span>
-      <div class="sister-body">
-        <strong>姐妹产品</strong> · 调研报告集 (汽车/智驾/AI/半导体 深度调研) →
-        <a href="https://binbinao.github.io/openclaw-impact-report/" target="_blank" rel="noopener">openclaw-impact-report</a>
+  <!-- Hero / KPI -->
+  <header class="hero">
+    <div class="hero-grid">
+      <div>
+        <h1>客户拜访前<span class="serif-it">尽调</span>简报</h1>
+        <p class="subtitle">AI 驱动 · <strong>多源交叉验证</strong> · 7 tier sources · 7 天有效期。按行业分类聚合，销售 / BD 现场 <strong>5 分钟速读</strong>。</p>
+        <div class="badge-row">
+          <span class="chip clay">⚡ SPA 切换</span>
+          <span class="chip olive">🆕 自动更新</span>
+          <span class="chip sky">🏷️ Tier 1-7 来源</span>
+        </div>
+      </div>
+      <div class="kpi-grid">
+        <div class="kpi-card">
+          <div class="kpi-num" id="kpi-clients">—</div>
+          <div class="kpi-label">总客户</div>
+          <div class="kpi-sub">客户去重数</div>
+        </div>
+        <div class="kpi-card clay">
+          <div class="kpi-num" id="kpi-briefs">—</div>
+          <div class="kpi-label">总简报</div>
+          <div class="kpi-sub">已生成篇数</div>
+        </div>
+        <div class="kpi-card olive">
+          <div class="kpi-num" id="kpi-cats">—</div>
+          <div class="kpi-label">行业覆盖</div>
+          <div class="kpi-sub">本季度</div>
+        </div>
       </div>
     </div>
   </header>
+
+  <div class="sister-strip" role="complementary">
+    <span class="sister-icon">🏛</span>
+    <div>
+      <strong>姐妹产品</strong> · 调研报告集 (汽车 / 智驾 / AI / 半导体 深度调研) →
+      <a href="https://binbinao.github.io/openclaw-impact-report/" target="_blank" rel="noopener">openclaw-impact-report</a>
+    </div>
+  </div>
 
   <nav class="nav" aria-label="移动端行业导航">
     <a href="#auto">🚗 汽车 Tier 1</a>
@@ -237,46 +568,79 @@
 
   <!-- ====== 汽车 Tier 1 ====== -->
   <section id="auto" class="cat-section" data-briefs-count="1">
-    <h2 class="cat-title">🚗 汽车 Tier 1 &amp; 主机厂 <span class="count">1 篇</span></h2>
+    <div class="cat-title">
+      <span class="icon-disc">🚗</span>
+      <h2>汽车 Tier 1 &amp; 主机厂</h2>
+      <span class="count">1 篇</span>
+      <span class="meta">active</span>
+    </div>
     <div class="report-list">
       <div class="report">
         <span class="icon">🔧</span>
         <div class="info">
-          <a href="联合汽车电子/2026-08-10.html">联合汽车电子 (UAES) 拜访前 AI 尽调简报</a>
-          <a class="md-fallback" href="联合汽车电子/2026-08-10.md" style="font-size:11px; color:var(--gray-500); margin-left:6px;">[MD]</a>
-          <div class="desc"><span class="tag auto">Tier 1 供应商</span><span class="tag tier1">官网/工商</span><span class="tag tier2">36Kr/腾讯/搜狐</span><span class="tag tier4">招聘/脉脉</span>博世 + 中联合资 · EMS/TCU/域控/BMS · 30 周年后再出发 · 2026 扩产 + 跨域融合 + 国产化供应链整合</div>
+          <a class="title" href="联合汽车电子/2026-08-10.html">联合汽车电子 (UAES) — 拜访前 AI 尽调简报</a>
+          <a class="md-fallback" href="联合汽车电子/2026-08-10.md">[MD]</a>
+          <div class="meta-row">
+            <span class="tier-row">
+              <span class="tier-tag t1">Tier 1</span>
+              <span class="tier-tag t2">Tier 2</span>
+              <span class="tier-tag t4">Tier 4</span>
+              <span class="tier-tag cad">官网 / 工商 / 36Kr / 脉脉</span>
+            </span>
+            <span class="expiry"><span class="dot"></span>7 天内有效</span>
+          </div>
+          <div class="desc">博世 + 中联合资 · EMS / TCU / 域控 / BMS · 30 周年后再出发 · 2026 扩产 + 跨域融合 + 国产化供应链整合。</div>
         </div>
         <span class="date">2026-08-10</span>
+        <span class="open-arrow">→</span>
       </div>
     </div>
   </section>
 
   <!-- ====== 芯片/半导体 ====== -->
   <section id="chip" class="cat-section" data-briefs-count="0">
-    <h2 class="cat-title">🔌 芯片 / 半导体 <span class="count">0 篇</span></h2>
+    <div class="cat-title chip">
+      <span class="icon-disc">🔌</span>
+      <h2>芯片 / 半导体</h2>
+      <span class="count">0 篇</span>
+      <span class="meta">pending</span>
+    </div>
     <div class="report-list">
-      <div class="report">
-        <span class="info" style="color:var(--gray-500); font-size:13px; padding:8px 0;">尚无简报,等待下一份调研。</span>
+      <div class="empty-state">
+        <span class="empty-icon">🌱</span>
+        尚无简报,等待下一份调研。
       </div>
     </div>
   </section>
 
   <!-- ====== 能源/电池 ====== -->
   <section id="energy" class="cat-section" data-briefs-count="0">
-    <h2 class="cat-title">⚡ 能源 / 电池 <span class="count">0 篇</span></h2>
+    <div class="cat-title energy">
+      <span class="icon-disc">⚡</span>
+      <h2>能源 / 电池</h2>
+      <span class="count">0 篇</span>
+      <span class="meta">pending</span>
+    </div>
     <div class="report-list">
-      <div class="report">
-        <span class="info" style="color:var(--gray-500); font-size:13px; padding:8px 0;">尚无简报,等待下一份调研。</span>
+      <div class="empty-state">
+        <span class="empty-icon">🌱</span>
+        尚无简报,等待下一份调研。
       </div>
     </div>
   </section>
 
   <!-- ====== 其他 ====== -->
   <section id="other" class="cat-section" data-briefs-count="0">
-    <h2 class="cat-title">🏢 其他客户 <span class="count">0 篇</span></h2>
+    <div class="cat-title other">
+      <span class="icon-disc">🏢</span>
+      <h2>其他客户</h2>
+      <span class="count">0 篇</span>
+      <span class="meta">pending</span>
+    </div>
     <div class="report-list">
-      <div class="report">
-        <span class="info" style="color:var(--gray-500); font-size:13px; padding:8px 0;">尚无简报,等待下一份调研。</span>
+      <div class="empty-state">
+        <span class="empty-icon">🌱</span>
+        尚无简报,等待下一份调研。
       </div>
     </div>
   </section>
@@ -289,7 +653,7 @@
 </div>
 
 <script>
-// ====== SPA 行业切换: hash 驱动 ======
+// ====== SPA 行业切换: hash 驱动 + a11y (aria-current + reduced-motion) ======
 (function() {
   const VALID = ['auto', 'chip', 'energy', 'other'];
   const DEFAULT = 'auto';
@@ -300,21 +664,22 @@
     document.querySelectorAll('section.cat-section').forEach(s => {
       s.classList.toggle('is-hidden', s.id !== cat);
     });
-    // 更新 sidebar 激活态
+    // 更新 sidebar 激活态 (a11y: aria-current)
     document.querySelectorAll('.cat-item').forEach(a => {
-      a.classList.toggle('active', a.dataset.cat === cat);
+      const isActive = a.dataset.cat === cat;
+      a.classList.toggle('active', isActive);
+      if (isActive) a.setAttribute('aria-current', 'true');
+      else a.removeAttribute('aria-current');
     });
-    // 滚动到 main 顶部 (桌面端) / 不滚动 (移动端,避免 hash 锚点跳动)
+    // 桌面端: 如果用户滚到了下方,切换时滚回 main 顶部
     if (window.innerWidth >= 1024) {
       const main = document.querySelector('.main');
       if (main && (window.scrollY > main.offsetTop + 200)) {
-        // 用户已滚动到下方,切换分类时回到 main 顶部
         window.scrollTo({ top: main.offsetTop - 16, behavior: 'smooth' });
       }
     }
   }
 
-  // 行业统计: 扫各 section 的 data-briefs-count
   function renderStats() {
     let totalBriefs = 0;
     let coveredCats = 0;
@@ -326,16 +691,19 @@
       uniqueClients.add(cat);
       totalBriefs += n;
       if (n > 0) coveredCats++;
-      // 写到 sidebar 计数
       const c = document.querySelector(`.cat-count[data-count-for="${cat}"]`);
-      if (c) c.textContent = `${clientsInCat} 客户 · ${n} 篇`;
+      if (c) c.textContent = `${n}`;
     });
-    document.getElementById('stat-clients').textContent = uniqueClients.size;
-    document.getElementById('stat-briefs').textContent = totalBriefs;
-    document.getElementById('stat-cats').textContent = `${coveredCats} / ${VALID.length}`;
+    // KPI hero
+    const kClients = document.getElementById('kpi-clients');
+    const kBriefs = document.getElementById('kpi-briefs');
+    const kCats = document.getElementById('kpi-cats');
+    if (kClients) kClients.textContent = uniqueClients.size;
+    if (kBriefs) kBriefs.textContent = totalBriefs;
+    if (kCats) kCats.textContent = `${coveredCats} / ${VALID.length}`;
   }
 
-  // 拦截 sidebar 点击: 阻止默认 scroll, 用 smooth 切换
+  // sidebar SPA 切换
   document.querySelectorAll('.cat-item').forEach(a => {
     a.addEventListener('click', (e) => {
       e.preventDefault();
@@ -349,12 +717,11 @@
     });
   });
 
-  // 监听 hashchange (浏览器后退/前进 / 手动改 URL)
   window.addEventListener('hashchange', () => {
     activate(location.hash.replace('#', '') || DEFAULT);
   });
 
-  // 拦截 nav 链接 (移动端): 同样 SPA 切换
+  // 移动端 nav 胶囊
   document.querySelectorAll('.nav a').forEach(a => {
     a.addEventListener('click', (e) => {
       e.preventDefault();
@@ -369,7 +736,6 @@
     });
   });
 
-  // 初始化
   renderStats();
   activate(location.hash.replace('#', '') || DEFAULT);
 })();
