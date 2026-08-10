@@ -91,9 +91,12 @@ def md_to_html(md: str, slug_hint: str = "") -> tuple[str, list[tuple[str, str, 
             i += 1
             continue
 
-        # H2 (章节)
+        # H2 (章节) — 进入新章节前先闭合上一节,保证 DOM 是真兄弟而非嵌套
         if line.startswith("## "):
             heading = line[3:].strip()
+            # 先闭合上一节(若有)
+            if section_idx > 0:
+                out.append('</div></section>')
             section_idx += 1
             sid = f"sec-{section_idx}"
             color_key = SECTION_PALETTE[min(section_idx - 1, len(SECTION_PALETTE) - 1)]
@@ -171,7 +174,7 @@ def md_to_html(md: str, slug_hint: str = "") -> tuple[str, list[tuple[str, str, 
                     src = row[3] if len(row) > 3 else ""
                     cat_color = classify_category(cat)
                     out.append(
-                        f'<div class="tl-item">'
+                        f'<div class="tl-item" tabindex="0">'
                         f'<div class="tl-date">{esc(t)}</div>'
                         f'<div class="tl-cat cat-{cat_color}">{esc(cat)}</div>'
                         f'<div class="tl-event">{inline_md(ev)}</div>'
@@ -202,7 +205,7 @@ def md_to_html(md: str, slug_hint: str = "") -> tuple[str, list[tuple[str, str, 
                         elif any(k in dim for k in org_keys):
                             group_tag = '<span class="dim-group">组织</span>'
                     out.append(
-                        f'<div class="dim-card{extra_cls}">'
+                        f'<div class="dim-card{extra_cls}" tabindex="0">'
                         f'<div class="dim-key">{group_tag}{esc(dim)}</div>'
                         f'<div class="dim-val">{inline_md(val)}</div>'
                         f'<div class="dim-src">{esc(src)}</div>'
@@ -245,8 +248,9 @@ def md_to_html(md: str, slug_hint: str = "") -> tuple[str, list[tuple[str, str, 
             continue
 
         # 数字列表(支持子条目 - 或   -)—— 用于拜访要点结构
+        # 状态机: 持续吞入数字条目 + 子条目, 直到遇见 非空/非数字/非子项 行才一次性 emit
         if re.match(r"^\s*\d+[\.、]\s", line):
-            items = []
+            items: list = []
             current = None
             while i < n:
                 ln = lines[i]
@@ -259,17 +263,17 @@ def md_to_html(md: str, slug_hint: str = "") -> tuple[str, list[tuple[str, str, 
                     current["subs"].append(re.sub(r"^\s*[-*]\s", "", ln))
                     i += 1
                 elif ln.strip() == "" and i + 1 < n:
-                    # 空行: 下一行是新主条目 / 子条目 / 新章节, 则停
+                    # 空行:若下一行仍是数字/子条目/子项,继续; 否则停
                     nxt = lines[i + 1]
-                    if re.match(r"^\s*\d+[\.、]\s", nxt) or re.match(r"^\s*[-*]\s", nxt) or nxt.startswith("#"):
-                        i += 1
-                        break
+                    if re.match(r"^\s*\d+[\.、]\s", nxt) or re.match(r"^\s*[-*]\s", nxt):
+                        i += 1  # 跳过空行, 继续
                     else:
-                        i += 1
+                        # 出口: 不前进 i, 让外层重新处理这条空行(走"空行"分支)
+                        break
                 elif ln.strip() == "":
                     i += 1
                 else:
-                    # 续行(本行不是新条目开头也没空行)
+                    # 续行(非数字非子项非空)
                     if current is not None:
                         if current["subs"]:
                             current["subs"][-1] += " " + ln.strip()
@@ -286,7 +290,7 @@ def md_to_html(md: str, slug_hint: str = "") -> tuple[str, list[tuple[str, str, 
                     sub_html = "".join(f'<div class="visit-sub">{inline_md(s)}</div>' for s in item["subs"])
                     out.append(
                         f'<li class="visit-card">'
-                        f'<div class="visit-num">0{vi + 1}</div>'
+                        f'<div class="visit-num">{vi + 1:02d}</div>'
                         f'<div class="visit-body">'
                         f'<div class="visit-title">{inline_md(title_txt)}</div>'
                         f'{sub_html}'
@@ -318,13 +322,9 @@ def md_to_html(md: str, slug_hint: str = "") -> tuple[str, list[tuple[str, str, 
 
     # 关闭 § 段最后一个 sec-body / section
     body = "".join(out)
-    # 找最后一个 <section 的 div.sec-body,补 close
-    body = body.replace('<div class="sec-body">', '<div class="sec-body">', 0)
-    # 简易 close:在文件末尾添加缺失的闭合
-    open_secs = body.count('<section ')
-    close_secs = body.count('</section>')
-    if open_secs > close_secs:
-        body += ('</div>' * (open_secs - close_secs)) + ('</section>' * (open_secs - close_secs))
+    # 每节都已在 H2 进入时显式闭合,这里只需补最末一节(若有)
+    if section_idx > 0:
+        body += '</div></section>'
     return body, toc
 
 
@@ -445,12 +445,12 @@ def render_page(body_html: str, title: str, meta: dict, toc: "list[tuple[str, st
   </div>
 </header>
 
-<aside class="toc-rail" aria-label="目录">
+<nav class="toc-rail" aria-label="目录">
   <div class="toc-rail-inner">
     <div class="toc-label">目录</div>
     {toc_block}
   </div>
-</aside>
+</nav>
 
 <main class="brief-body">
 {body_html}
@@ -463,19 +463,20 @@ def render_page(body_html: str, title: str, meta: dict, toc: "list[tuple[str, st
 
 </div>
 <script>
-// scroll-spy for TOC
+// scroll-spy for TOC — 联动 .active class + aria-current="location"
 (function(){{
   const secs = document.querySelectorAll('.brief-section');
   const links = document.querySelectorAll('.toc-rail a');
-  const map = new Map();
-  secs.forEach(s => map.set(s.id, links));
   function spy(){{
     const y = window.scrollY + 120;
     let active = null;
-    secs.forEach(s => {{
-      if (s.offsetTop <= y) active = s.id;
+    secs.forEach(s => {{ if (s.offsetTop <= y) active = s.id; }});
+    links.forEach(a => {{
+      const isActive = a.getAttribute('href') === '#' + active;
+      a.classList.toggle('active', isActive);
+      if (isActive) a.setAttribute('aria-current', 'location');
+      else a.removeAttribute('aria-current');
     }});
-    links.forEach(a => a.classList.toggle('active', a.getAttribute('href') === '#' + active));
   }}
   window.addEventListener('scroll', spy, {{ passive: true }});
   spy();
@@ -504,9 +505,9 @@ def render_toc(toc: list) -> str:
         return ""
     items = []
     for sid, heading, icon in toc:
-        # 截短章节标题做 toc label
-        short = re.sub(r"^[\W_]+", "", heading)
-        short = re.sub(r"\s+\d+(\.\d+)*\s*", " ", short)
+        # 仅剥掉开头的章节编号 "1." / "2." / "⚡ 4." 等,不破坏括号内的数字
+        short = re.sub(r"^\s*(?:[\W_]*\d+[\.、]?\s*)+", "", heading).strip()
+        short = short or heading
         items.append(f'<a href="#{sid}" class="toc-link"><span class="toc-icon">{icon}</span><span class="toc-text">{html.escape(short)}</span></a>')
     return "".join(items)
 
@@ -522,6 +523,30 @@ def build_css() -> str:
     --gray-500: {t['gray500']}; --gray-700: {t['gray700']};
     --border: 1.5px solid var(--gray-300);
     --radius: 12px;
+    --ease: cubic-bezier(0.16, 1, 0.3, 1);
+    --dur-fast: 150ms;
+    --dur-base: 250ms;
+  }}
+
+  /* ===== a11y: 全局 :focus-visible 描边 (skill 强制要求) ===== */
+  *:focus-visible {{
+    outline: 2px solid var(--clay);
+    outline-offset: 2px;
+  }}
+  /* 不改 border-radius (skill 警告:会破坏 pill 几何) */
+  a:focus-visible, button:focus-visible, .toc-link:focus-visible, .btn:focus-visible {{
+    outline-offset: 3px;
+  }}
+
+  /* ===== a11y: 前庭敏感用户关闭所有过渡 ===== */
+  @media (prefers-reduced-motion: reduce) {{
+    html {{ scroll-behavior: auto; }}
+    *, *::before, *::after {{
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }}
   }}
   * {{ margin:0; padding:0; box-sizing:border-box; }}
   html {{ scroll-behavior: smooth; }}
@@ -606,7 +631,7 @@ def build_css() -> str:
   .dim-card {{ display:grid; grid-template-columns:120px 1fr 200px; gap:14px;
                padding:14px 16px; background:var(--bg); border-radius:8px; border:1px solid var(--gray-100);
                transition:all .15s; align-items:start; min-height:64px; }}
-  .dim-card:hover {{ border-color:var(--clay); background:var(--card); }}
+  .dim-card:hover, .dim-card:focus-within {{ border-color:var(--clay); background:var(--card); }}
   .dim-card .dim-group {{ display:inline-block; font-size:10px; padding:1px 6px; border-radius:3px;
                           background:var(--gray-100); color:var(--gray-500); margin-bottom:4px; }}
   .dim-card.gov {{ border-left:3px solid var(--olive); }}
@@ -662,6 +687,9 @@ def build_css() -> str:
   .sec-body ul.md-list {{ list-style:none; padding:0; }}
   .sec-body ul.md-list li {{ padding:10px 14px; margin-bottom:8px; background:var(--bg); border-radius:8px; border:1px solid var(--gray-100); }}
   .sec-body ul.md-list li:hover {{ border-color:var(--sky); }}
+  /* 来源区文字提亮到 gray-700 (4.5:1 AA 通过,原 gray-500 只有 3.0:1) */
+  .sec-body ul.md-list li, .sec-body ul.md-list li * {{ color:var(--gray-700); }}
+  .sec-body .md-link {{ color:var(--sky); }}
 
   /* footer */
   .brief-foot {{ text-align:center; margin-top:40px; padding-top:24px; border-top:var(--border); color:var(--gray-500); font-size:13px; }}
@@ -669,8 +697,27 @@ def build_css() -> str:
   .brief-foot code {{ background:var(--gray-100); padding:1px 6px; border-radius:4px; font-size:12px; color:var(--gray-700); }}
 
   /* responsive */
+  /* 中等屏幕: dim-card 中间档 */
+  @media (max-width:980px) {{
+    .dim-card {{ grid-template-columns:100px 1fr 160px; }}
+    .toc-rail {{ width:min(200px, 22vw); }}
+  }}
+  /* 移动端: toc-rail 改为底部固定 tab bar (不再 display:none) */
   @media (max-width:820px) {{
-    .toc-rail {{ display:none; }}
+    .toc-rail {{
+      position:fixed; top:auto; bottom:0; left:0; right:0;
+      width:100%; max-width:100vw; margin:0; padding:8px;
+      background:var(--card); border-top:var(--border);
+      border-radius:var(--radius) var(--radius) 0 0;
+      box-shadow:0 -2px 12px rgba(0,0,0,.04);
+      z-index:50;
+    }}
+    .toc-rail-inner {{ display:flex; align-items:center; gap:6px; padding:4px 8px; }}
+    .toc-label {{ display:none; }}
+    .toc-link {{ flex:1; justify-content:center; padding:8px 4px; font-size:11px; }}
+    .toc-link .toc-text {{ display:none; }}
+    .toc-link .toc-icon {{ font-size:18px; }}
+    body {{ padding-bottom:80px; }}
     .dim-card {{ grid-template-columns:1fr; }}
     .dim-key {{ padding-top:0; }}
     .dim-src {{ grid-column:auto; padding-top:0; }}
@@ -680,7 +727,7 @@ def build_css() -> str:
     .tl-src {{ padding-left:0; grid-column:auto; }}
   }}
   @media (max-width:600px) {{
-    body {{ padding:20px 14px 60px; }}
+    body {{ padding:20px 14px 100px; }}
     .brief-title {{ font-size:22px; }}
     .brief-section {{ padding:18px 18px; }}
     .visit-card {{ grid-template-columns:1fr; }}
@@ -690,7 +737,7 @@ def build_css() -> str:
 
 
 # ---------------- header meta 解析 ----------------
-META_RE = re.compile(r"^>\s*\*\*([^:]+):\*\*\s*(.+)$")
+META_RE = re.compile(r"^>\s*\*\*([^*]+)\*\*:\s*(.+)$")
 
 
 def extract_meta(md_text: str) -> tuple[dict, str]:
