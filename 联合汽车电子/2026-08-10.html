@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>联合汽车电子 拜访前 AI 尽调简报 · 客户尽调简报</title>
+<style>
+  :root {
+    --bg: #F8F7F4; --card: #FFFFFF; --text: #141413;
+    --clay: #D97757; --olive: #788C5D; --rust: #B04A3F;
+    --sky: #5B8BA0; --purple: #8B6B9E;
+    --gray-100: #EEECE6; --gray-300: #D1CFC5;
+    --gray-500: #87867F; --gray-700: #3D3D3A;
+    --border: 1.5px solid var(--gray-300);
+    --radius: 12px;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  html { scroll-behavior: smooth; }
+  body { background:var(--bg); color:var(--text); font-family:system-ui,-apple-system,"Microsoft YaHei",sans-serif;
+         font-size:15px; line-height:1.65; padding:32px 20px 80px; }
+  .page { max-width:980px; margin:0 auto; position:relative; }
+
+  /* header */
+  .brief-header { text-align:center; margin-bottom:32px; padding-bottom:24px; border-bottom:var(--border); }
+  .brief-kicker { font-size:12px; letter-spacing:.18em; color:var(--gray-500); text-transform:uppercase; margin-bottom:8px; }
+  .brief-title { font-size:30px; font-weight:600; color:var(--text); margin-bottom:14px; line-height:1.3; }
+  .brief-meta { display:flex; flex-wrap:wrap; gap:10px 18px; justify-content:center; margin-bottom:18px; }
+  .meta-item { display:inline-flex; align-items:center; gap:6px; padding:6px 12px; background:var(--card); border:var(--border); border-radius:20px; font-size:13px; }
+  .meta-icon { font-size:13px; }
+  .meta-key { color:var(--gray-500); font-size:12px; }
+  .meta-val { color:var(--text); font-weight:500; }
+  .brief-actions { display:flex; gap:8px; justify-content:center; flex-wrap:wrap; }
+  .btn { display:inline-block; padding:6px 14px; border-radius:18px; font-size:13px; text-decoration:none; transition:all .2s; }
+  .btn-ghost { background:var(--card); border:var(--border); color:var(--gray-700); }
+  .btn-ghost:hover { border-color:var(--clay); color:var(--clay); background:var(--gray-100); }
+
+  /* TOC rail */
+  .toc-rail { position:sticky; top:24px; float:right; width:200px; margin:0 0 24px 24px; z-index:5; }
+  .toc-rail-inner { background:var(--card); border:var(--border); border-radius:var(--radius); padding:14px 12px; }
+  .toc-label { font-size:11px; color:var(--gray-500); text-transform:uppercase; letter-spacing:.15em; margin-bottom:10px; padding-left:4px; }
+  .toc-link { display:flex; align-items:center; gap:8px; padding:7px 8px; border-radius:8px; font-size:13px; color:var(--gray-700); text-decoration:none; transition:all .15s; }
+  .toc-link:hover { background:var(--gray-100); color:var(--text); }
+  .toc-link.active { background:rgba(217,119,87,.1); color:var(--clay); font-weight:600; }
+  .toc-icon { flex-shrink:0; font-size:14px; }
+  .toc-text { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+
+  /* main */
+  .brief-body { max-width:740px; }
+
+  /* sections */
+  .brief-section { background:var(--card); border:var(--border); border-radius:var(--radius);
+                    padding:22px 26px; margin-bottom:24px; position:relative; overflow:hidden; }
+  .brief-section::before { content:""; position:absolute; top:0; left:0; width:4px; height:100%; background:var(--section-color, var(--gray-300)); }
+  .sec-sky { --section-color: var(--sky); }
+  .sec-olive { --section-color: var(--olive); }
+  .sec-rust { --section-color: var(--rust); }
+  .sec-clay { --section-color: var(--clay); }
+  .sec-gray500 { --section-color: var(--gray-500); }
+
+  .sec-head { display:flex; align-items:center; gap:10px; margin-bottom:16px; padding-bottom:12px; border-bottom:1px dashed var(--gray-300); }
+  .sec-icon { font-size:22px; flex-shrink:0; }
+  .sec-num { font-size:11px; color:var(--gray-500); font-family:monospace; letter-spacing:.1em; padding:3px 7px; background:var(--gray-100); border-radius:4px; }
+  .sec-title { font-size:20px; font-weight:600; color:var(--text); flex:1; }
+  .sec-tag { font-size:11px; color:var(--gray-500); padding:3px 8px; border:1px solid var(--gray-300); border-radius:10px; }
+  .sec-body { color:var(--text); }
+
+  .sub-head { font-size:16px; font-weight:600; color:var(--text); margin:18px 0 10px; padding-left:10px; border-left:3px solid var(--sky); }
+  .micro-head { font-size:14px; font-weight:600; color:var(--gray-700); margin:14px 0 6px; }
+
+  /* paragraphs */
+  .md-p { margin-bottom:10px; color:var(--gray-700); }
+  .md-p strong { color:var(--text); font-weight:600; }
+
+  /* md links */
+  .md-link { color:var(--sky); text-decoration:none; border-bottom:1px solid rgba(91,139,160,.3); transition:all .15s; }
+  .md-link:hover { color:var(--clay); border-bottom-color:var(--clay); }
+  .md-link-domain { font-size:11px; color:var(--gray-500); margin-left:2px; }
+
+  /* lists */
+  .md-list { padding-left:20px; margin:8px 0; color:var(--gray-700); }
+  .md-list li { margin-bottom:4px; }
+  .md-list.num { padding-left:24px; }
+
+  /* blockquote banners */
+  .quote-banner { display:flex; gap:12px; align-items:flex-start; padding:12px 16px; border-radius:10px;
+                   margin:12px 0; font-size:14px; line-height:1.6; border:1.5px solid; }
+  .quote-banner .q-icon { font-size:18px; flex-shrink:0; line-height:1.6; }
+  .quote-banner .q-body { flex:1; }
+  .q-sky { background:rgba(91,139,160,.08); border-color:rgba(91,139,160,.4); color:var(--text); }
+  .q-olive { background:rgba(120,140,93,.08); border-color:rgba(120,140,93,.4); color:var(--text); }
+  .q-clay { background:rgba(217,119,87,.1); border-color:rgba(217,119,87,.5); color:var(--text); font-weight:500; }
+  .q-rust { background:rgba(176,74,63,.08); border-color:rgba(176,74,63,.4); color:var(--text); }
+  .q-clay strong, .q-rust strong { color:inherit; }
+
+  /* dim grid (§1 §2) */
+  .dim-grid { display:grid; gap:10px; margin-top:8px; }
+  .dim-card { display:grid; grid-template-columns:120px 1fr 200px; gap:14px;
+               padding:14px 16px; background:var(--bg); border-radius:8px; border:1px solid var(--gray-100);
+               transition:all .15s; align-items:start; min-height:64px; }
+  .dim-card:hover { border-color:var(--clay); background:var(--card); }
+  .dim-card .dim-group { display:inline-block; font-size:10px; padding:1px 6px; border-radius:3px;
+                          background:var(--gray-100); color:var(--gray-500); margin-bottom:4px; }
+  .dim-card.gov { border-left:3px solid var(--olive); }
+  .dim-card.cap { border-left:3px solid var(--purple); }
+  .dim-key { color:var(--sky); font-weight:600; font-size:13px; padding-top:2px; }
+  .dim-val { color:var(--text); font-size:14px; line-height:1.65; }
+  .dim-val strong { color:var(--clay); }
+  .dim-src { color:var(--gray-500); font-size:11px; padding-top:4px; font-family:monospace;
+              word-break:break-all; }
+
+  /* timeline (§3) */
+  .timeline { position:relative; padding-left:8px; margin-top:6px; }
+  .timeline::before { content:""; position:absolute; left:80px; top:8px; bottom:8px; width:2px; background:var(--gray-300); }
+  .tl-item { display:grid; grid-template-columns:74px 110px 1fr; gap:14px;
+              padding:10px 12px; margin-bottom:8px; border-radius:8px; transition:all .15s;
+              align-items:start; position:relative; }
+  .tl-item:hover { background:var(--bg); }
+  .tl-item::before { content:""; position:absolute; left:78px; top:16px; width:8px; height:8px; border-radius:50%; background:var(--clay); border:2px solid var(--card); }
+  .tl-date { font-family:monospace; color:var(--sky); font-weight:600; font-size:13px; padding-top:1px; }
+  .tl-cat { font-size:11px; padding:3px 8px; border-radius:10px; display:inline-block; text-align:center; font-weight:500; }
+  .cat-rust { background:rgba(176,74,63,.12); color:var(--rust); }
+  .cat-clay { background:rgba(217,119,87,.12); color:var(--clay); }
+  .cat-olive { background:rgba(120,140,93,.12); color:var(--olive); }
+  .cat-sky { background:rgba(91,139,160,.12); color:var(--sky); }
+  .cat-purple { background:rgba(139,107,158,.12); color:var(--purple); }
+  .cat-gray500 { background:var(--gray-100); color:var(--gray-500); }
+  .tl-event { color:var(--text); font-size:14px; line-height:1.6; }
+  .tl-event strong { color:var(--clay); }
+  .tl-src { grid-column:1/-1; padding-left:200px; color:var(--gray-500); font-size:11px; font-family:monospace; }
+
+  /* visit list (§4) */
+  .visit-list { list-style:none; padding:0; margin:0; counter-reset:visit; }
+  .visit-card { display:grid; grid-template-columns:60px 1fr; gap:14px; padding:14px 16px;
+                 margin-bottom:10px; border-radius:10px; background:linear-gradient(135deg, rgba(217,119,87,.06), rgba(217,119,87,.02));
+                 border:1.5px solid rgba(217,119,87,.3); position:relative; }
+  .visit-card:hover { border-color:var(--clay); box-shadow:0 2px 8px rgba(217,119,87,.1); }
+  .visit-num { font-family:"Georgia",serif; font-size:32px; font-weight:700; color:var(--clay); line-height:1; padding-top:2px; }
+  .visit-body { color:var(--text); }
+  .visit-title { font-weight:600; font-size:15px; color:var(--text); margin-bottom:6px; }
+  .visit-text { font-size:13.5px; color:var(--gray-700); line-height:1.7; }
+  .visit-text strong { color:var(--clay); }
+  .visit-sub { font-size:13px; color:var(--gray-700); line-height:1.7; margin-top:6px; padding-left:10px; border-left:2px solid rgba(217,119,87,.3); }
+  .visit-sub strong { color:var(--clay); }
+  .visit-sub::before { content:"· "; color:var(--clay); font-weight:bold; margin-right:4px; }
+
+  /* raw table fallback */
+  .raw-table-wrap { overflow-x:auto; margin:10px 0; }
+  .raw-table { width:100%; border-collapse:collapse; font-size:13px; }
+  .raw-table th, .raw-table td { padding:8px 10px; border:1px solid var(--gray-300); text-align:left; }
+  .raw-table th { background:var(--gray-100); font-weight:600; }
+
+  /* source link styles (§5) */
+  .sec-body ul.md-list { list-style:none; padding:0; }
+  .sec-body ul.md-list li { padding:10px 14px; margin-bottom:8px; background:var(--bg); border-radius:8px; border:1px solid var(--gray-100); }
+  .sec-body ul.md-list li:hover { border-color:var(--sky); }
+
+  /* footer */
+  .brief-foot { text-align:center; margin-top:40px; padding-top:24px; border-top:var(--border); color:var(--gray-500); font-size:13px; }
+  .brief-foot .muted { margin-top:6px; font-size:11px; }
+  .brief-foot code { background:var(--gray-100); padding:1px 6px; border-radius:4px; font-size:12px; color:var(--gray-700); }
+
+  /* responsive */
+  @media (max-width:820px) {
+    .toc-rail { display:none; }
+    .dim-card { grid-template-columns:1fr; }
+    .dim-key { padding-top:0; }
+    .dim-src { grid-column:auto; padding-top:0; }
+    .timeline::before { left:14px; }
+    .tl-item { grid-template-columns:1fr; gap:4px; }
+    .tl-item::before { display:none; }
+    .tl-src { padding-left:0; grid-column:auto; }
+  }
+  @media (max-width:600px) {
+    body { padding:20px 14px 60px; }
+    .brief-title { font-size:22px; }
+    .brief-section { padding:18px 18px; }
+    .visit-card { grid-template-columns:1fr; }
+    .visit-num { font-size:24px; }
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+<header class="brief-header">
+  <div class="brief-kicker">📋 Customer Pre-Visit Briefing</div>
+  <h1 class="brief-title">联合汽车电子 拜访前 AI 尽调简报</h1>
+  <div class="brief-meta">
+    
+  </div>
+  <div class="brief-actions">
+    <a class="btn btn-ghost" href="https://github.com/binbinao/customer-pre-briefs/tree/main/联合汽车电子/2026-08-10.md">📝 查看 Markdown 源</a>
+    <a class="btn btn-ghost" href="https://github.com/binbinao/customer-pre-briefs/commit/main" target="_blank" rel="noopener">🔗 提交历史</a>
+    <a class="btn btn-ghost" href="/customer-pre-briefs/">← 返回简报索引</a>
+  </div>
+</header>
+
+<aside class="toc-rail" aria-label="目录">
+  <div class="toc-rail-inner">
+    <div class="toc-label">目录</div>
+    <a href="#sec-1" class="toc-link"><span class="toc-icon">🏢</span><span class="toc-text">1. 公司速览</span></a><a href="#sec-2" class="toc-link"><span class="toc-icon">👥</span><span class="toc-text">2. 组织与股权</span></a><a href="#sec-3" class="toc-link"><span class="toc-icon">📰</span><span class="toc-text">3. 近期动态(近 个月,2026-02 至 -08)</span></a><a href="#sec-4" class="toc-link"><span class="toc-icon">⚡</span><span class="toc-text">4. 拜访要点 条</span></a><a href="#sec-5" class="toc-link"><span class="toc-icon">📚</span><span class="toc-text">5. 数据来源 + 检索备注</span></a>
+  </div>
+</aside>
+
+<main class="brief-body">
+<section id="sec-1" class="brief-section sec-sky" data-sec="1"><header class="sec-head"><span class="sec-icon">🏢</span><span class="sec-num">§1</span><h2 class="sec-title">1. 公司速览</h2><span class="sec-tag">公司速览</span></header><div class="sec-body"><div class="dim-grid"><div class="dim-card"><div class="dim-key">主营业务</div><div class="dim-val">汽车电子控制系统:汽油发动机管理(EMS/ECU)、变速箱控制(TCU)、先进网联、混合动力与电力驱动(电机控制器/逆变器/DCDC)、BMS 电池管理、热管理、域控制器</div><div class="dim-src">百度百科 / 必应 AI 概览</div></div><div class="dim-card"><div class="dim-key">商业模式</div><div class="dim-val">Tier 1 供应商(B2B),为 OEM 提供电控系统 + 本地化标定/匹配服务;与博世总部技术共享,本地化研发生产闭环</div><div class="dim-src">UAES 官网 (uaes.com) / 博世中国 (博世中国子页面 UAES 条目当前 404,主要靠百科与企业征信补全)</div></div><div class="dim-card"><div class="dim-key">主要客户</div><div class="dim-val">上汽大众(1995 年成立第一个项目,发动机控制器国产化,2024 年合作 29 年)、上汽集团(自主新能源主力供应商)、一汽-大众、长安、广汽、奇瑞、长城、东风、吉利/极氪、蔚来/小鹏/理想、宝马/奥迪、保时捷等;2024 年 12 月与罗姆设 SiC 联合实验室,2025 年与英诺赛科/纳芯微共研 GaN 功率器件,2026 年与纳芯微深度合作</div><div class="dim-src">汽车之家 &quot;从 1 到 4&quot; / 搜狐汽车 / Bing AI 概览 / 雪球 / 新浪财经</div></div><div class="dim-card"><div class="dim-key">行业地位</div><div class="dim-val">国内<strong>乘用车汽油 EMS 龙头</strong>(博世本土合资,市占长期领先);中国汽车工业零部件三十强第 12 位 (2020);中国电子信息百强第 35 位 (2019);国家级绿色工厂;高新技术企业;国家企业技术中心 (2022);上海市智能工厂;2025 年获&quot;30 周年&quot;标志,2026 年干部大会明确&quot;再出发&quot;</div><div class="dim-src">百度百科 / 必应 / 上海汽车报</div></div></div><p class="md-p"><strong>一句话</strong>:30 年老牌 Tier 1,博世中国本土化主载体,正从&quot;燃油 ECU 国产化&quot;主轴转向&quot;新能源 + 智能网联 + 域控&quot;全栈解决方案商。</p><section id="sec-2" class="brief-section sec-olive" data-sec="2"><header class="sec-head"><span class="sec-icon">👥</span><span class="sec-num">§2</span><h2 class="sec-title">2. 组织与股权</h2><span class="sec-tag">组织与股权</span></header><div class="sec-body"><div class="dim-grid"><div class="dim-card gov"><div class="dim-key"><span class="dim-group">治理</span>法定代表人 / 董事长</div><div class="dim-val"><strong>Markus Heyn</strong>(博世集团董事会成员、移动出行业务主席)</div><div class="dim-src">百度百科 / 企查查</div></div><div class="dim-card gov"><div class="dim-key"><span class="dim-group">治理</span>总经理 / 党委副书记</div><div class="dim-val"><strong>熊伟铭</strong>(2021 年上海市优秀企业家候选人;长期汽车电子产业管理)</div><div class="dim-src">百度百科 熊伟铭词条 / 爱企查</div></div><div class="dim-card"><div class="dim-key"><span class="dim-group">组织</span>总部</div><div class="dim-val"><strong>上海自由贸易试验区榕桥路 555 号</strong>(浦东),生产基地:上海、无锡、西安、芜湖、<strong>柳州</strong>、太仓;技术中心:上海、重庆、芜湖、柳州、苏州;<strong>2026 年 5 月芜湖二期工厂正式启用</strong></div><div class="dim-src">百度百科 / 必应 / 车质网 / MarkLines</div></div><div class="dim-card cap"><div class="dim-key"><span class="dim-group">资本</span>注册资本</div><div class="dim-val">12 亿元人民币(截至 2025-09-06,国家企业信用信息公示)</div><div class="dim-src">百度百科</div></div><div class="dim-card"><div class="dim-key"><span class="dim-group">组织</span>成立时间</div><div class="dim-val">1995-12-25(2025 年满 30 周年)</div><div class="dim-src">百度百科 / 统一社会信用代码 913101156073392545</div></div><div class="dim-card"><div class="dim-key"><span class="dim-group">组织</span>员工规模</div><div class="dim-val"><strong>2019 年约 8,740 人</strong>(国聘/企查查口径);2026 校招扩招 29%(国聘口径,用于反映趋势);近 5 年招聘量: 2021/387、2022/304、2023/641、2024/400、2025/545(职友集)</div><div class="dim-src">Bing AI 概览(引国聘/企查查) / 职友集</div></div><div class="dim-card cap"><div class="dim-key"><span class="dim-group">资本</span>股权结构</div><div class="dim-val">中联汽车电子有限公司 <strong>49%</strong> + 罗伯特·博世有限公司(德国) <strong>41%</strong> + 博世(中国)投资有限公司 <strong>10%</strong>;外方合计 51%</div><div class="dim-src">百度百科</div></div><div class="dim-card cap"><div class="dim-key"><span class="dim-group">资本</span>主要股东</div><div class="dim-val">中联汽车电子 / 德国博世 / 博世中国投资(均为博世体系内),无独立财务投资人/VC 股东</div><div class="dim-src">百度百科 / 企查查</div></div></div><p class="md-p"><strong>组织观察</strong>: - 治理是&quot;博世控股 + 上汽系(中联汽车电子)参股&quot;的双轨制,关键决策权在博世,本土化运营由熊伟铭团队负责。 - 2026-01-30 召开 2026 年干部大会,定调&quot;30 周年后再出发&quot;(上海汽车报)。 - 2025 年与<strong>柳州工学院</strong>启动订单班培养项目,对应柳州分公司(2022 年 5G+ 智慧工厂)。</p><section id="sec-3" class="brief-section sec-rust" data-sec="3"><header class="sec-head"><span class="sec-icon">📰</span><span class="sec-num">§3</span><h2 class="sec-title">3. 近期动态(近 6 个月,2026-02 至 2026-08)</h2><span class="sec-tag">近期动态</span></header><div class="sec-body"><div class="timeline"><div class="tl-item"><div class="tl-date">2026-01</div><div class="tl-cat cat-rust">战略</div><div class="tl-event">联合电子召开 2026 年干部大会,回顾 2025 年 30 周年里程碑,部署 2026 攻坚方向</div><div class="tl-src">上海汽车报 2026-02-08</div></div><div class="tl-item"><div class="tl-date">2026-01</div><div class="tl-cat cat-clay">产品 / 业绩</div><div class="tl-event"><strong>BMS(电池管理系统)累计销量突破 1,000 万件</strong>,从第一代 500V 分布式 BMS 到 800V eBDU BMS 持续迭代</div><div class="tl-src">上海汽车报 2026-02-01</div></div><div class="tl-item"><div class="tl-date">2026-02</div><div class="tl-cat cat-purple">产能</div><div class="tl-event"><strong>太仓三期工厂落成</strong>(2024 年 12 月二期、2026 年太仓三期)</div><div class="tl-src">百度百科 / MarkLines</div></div><div class="tl-item"><div class="tl-date">2026-03</div><div class="tl-cat cat-sky">AI / 数字化</div><div class="tl-event">上汽集团&quot;AI+&quot;战略推进,联合电子被列为典型场景:深挖 AI 应用驱动效能跃升</div><div class="tl-src">腾讯新闻 2026-03-17</div></div><div class="tl-item"><div class="tl-date">2026-04</div><div class="tl-cat cat-gray500">行业活动</div><div class="tl-event">第十九届北京车展:&quot;跨域无界 智驭未来&quot;主题,集中展示&quot;三层&quot;电子电气架构、区域融合、跨域融合新范式(熊伟铭出席)</div><div class="tl-src">盖世汽车 / 腾讯新闻 2026-04-24 / 凤凰网汽车 2026-04-29</div></div><div class="tl-item"><div class="tl-date">2026-04</div><div class="tl-cat cat-clay">产品</div><div class="tl-event">北京车展发布全栈电驱解决方案,主打轻量化、低成本、高集成;<strong>量产首款自主高压 DC 变换器 "CON3evo"</strong></div><div class="tl-src">中国汽车报 2026-04-25 / 百度百科</div></div><div class="tl-item"><div class="tl-date">2026-05</div><div class="tl-cat cat-rust">战略</div><div class="tl-event">董保利(联合电子高管)出席 2026 中国汽车及零部件出海论坛:以&quot;品质和服务&quot;赋能中国汽车出海</div><div class="tl-src">盖世汽车 2026-05-07</div></div><div class="tl-item"><div class="tl-date">2026-05</div><div class="tl-cat cat-purple">产能 / 里程碑</div><div class="tl-event"><strong>芜湖二期工厂正式启用</strong>(2026-05-25),继上海、太仓后第三个规模化新能源核心基地</div><div class="tl-src">MarkLines 2026-05-28 / 车质网 2026-05-28</div></div><div class="tl-item"><div class="tl-date">2026-05</div><div class="tl-cat cat-sky">供应链</div><div class="tl-event">纳芯微获联合电子&quot;重要认可&quot;,车规级模拟/隔离/驱动芯片进入 UAES 体系</div><div class="tl-src">新浪财经 2026-05-28</div></div><div class="tl-item"><div class="tl-date">2026-06</div><div class="tl-cat cat-sky">供应链 / 定点</div><div class="tl-event">隆盛科技子公司获 UAES 项目定点:供应分离式电机定转子组件,生命周期 3 年,预计<strong>总营业额约 20 亿元,2026 Q3 量产</strong></div><div class="tl-src">雪球 2026-07-04 / 经济观察网 / 界面新闻 / 财联社</div></div><div class="tl-item"><div class="tl-date">2026-07</div><div class="tl-cat cat-rust">战略</div><div class="tl-event">持续向&quot;物理 AI&quot;(L4 自动驾驶、线控底盘、主动悬架)拓展,跨域融合成核心战略</div><div class="tl-src">腾讯新闻 2026-07</div></div><div class="tl-item"><div class="tl-date">2026-08</div><div class="tl-cat cat-olive">行业地位</div><div class="tl-event">2026 年校招需求较 2025 年增长 29%,产品研发/供应链/智能制造全面扩招</div><div class="tl-src">国聘 2025-08-27 校招公告</div></div></div><div class="quote-banner q-sky"><span class="q-icon">💬</span><div class="q-body"><strong>早期 2025 背景(用于 6 个月纵深)</strong>:2025-07 与英诺赛科、纳芯微三方共建氮化镓(GaN)功率电子联合实验室,聚焦智能集成 GaN 产品(港交所披露/HKEXnews 2025-07-29);2025-11 申请电机定子铁芯相关专利;2025-12 上汽新能源车逆势上扬,联合电子&quot;保供大后方&quot;角色凸显(搜狐汽车)。</div></div><section id="sec-4" class="brief-section sec-clay" data-sec="4"><header class="sec-head"><span class="sec-icon">⚡</span><span class="sec-num">§4</span><h2 class="sec-title">⚡ 4. 拜访要点 3 条</h2><span class="sec-tag">拜访要点</span></header><div class="sec-body"><ol class="visit-list"><li class="visit-card"><div class="visit-num">01</div><div class="visit-body"><div class="visit-title"><strong>30 周年后再出发,押注"跨域融合 + 物理 AI",是博世系本土化主载体</strong></div><div class="visit-sub">2026-01-30 干部大会明确从&quot;乐高式跨域集成&quot;向 L4/线控底盘/主动悬架方向升级;<strong>北京车展(2026-04)主推"三层"电子电气架构 + 区域融合</strong>;新量产&quot;CON3evo&quot;自主高压 DC 变换器印证自主能力提升。</div><div class="visit-sub">拜访钩子:用博世集团全球资源 + 上汽自主市场&quot;双轮&quot;做切入,讨论<strong>下一代域控 / 中央计算平台 / 中央+区域融合架构</strong>的分工与采购窗口。</div></div></li></ol><ol class="visit-list"><li class="visit-card"><div class="visit-num">01</div><div class="visit-body"><div class="visit-title"><strong>新能源产能集中爆发,2026 是订单放量 + 扩产验证年</strong></div><div class="visit-sub">产能侧:<strong>太仓三期(2026 初) + 芜湖二期(2026-05-25)双厂齐发</strong>,上海/无锡/西安/柳州 6 地基地网成型;<strong>BMS 累计破 1,000 万件、800V eBDU 量产</strong>;<strong>与隆盛科技签 3 年 20 亿元电机定转子定点(2026 Q3 量产)</strong>;<strong>纳芯微获 UAES 重要认可</strong>;<strong>罗姆 SiC、英诺赛科/纳芯微 GaN 联合实验室已落地</strong>。</div><div class="visit-sub">拜访钩子:围绕<strong>车规级 SiC/GaN 功率器件国产替代、800V 平台电驱/电控/电源总成、奇瑞/吉利/长安/上汽自主出海车型</strong>的供应窗口谈。</div></div></li></ol><ol class="visit-list"><li class="visit-card"><div class="visit-num">01</div><div class="visit-body"><div class="visit-title"><strong>2025 营收 370.88 亿元量级(估算),Tier 1 头部但仍面临国产 Tier 1 挤压 + 燃油业务持续萎缩</strong></div><div class="visit-sub">公开口径:2023 销售收入 <strong>370.88 亿元</strong>(百度百科),2019 约 219 亿元 / 8,740 人(国聘/企查查),2025 年 30 周年里程碑;<strong>校招扩招 29% 印证 2026 用人加速</strong>。</div><div class="visit-sub">风险点:①EMS 燃油基本盘受新能源侵蚀,纯增量看 800V/SiC;②与汇川联合动力、英搏尔、华为 DriveONE、欣锐等国产电驱 Tier 1 在 200V-400V 平台已正面竞争;③博世中国本土化项目优先级可能与全球博世资源分配冲突。</div><div class="visit-sub">拜访钩子:把客户定位为&quot;<strong>博世 + 上汽体系内最稳的国产化抓手</strong>&quot;——强调<strong>系统级配套 + 长期服务能力 + 30 年认证壁垒</strong>,而不是单点器件价格战。 ---</div></div></li></ol><section id="sec-5" class="brief-section sec-gray500" data-sec="5"><header class="sec-head"><span class="sec-icon">📚</span><span class="sec-num">§5</span><h2 class="sec-title">5. 数据来源 + 检索备注</h2><span class="sec-tag">数据来源</span></header><div class="sec-body"><h3 class="sub-head">已使用来源(独立 10 条)</h3><ul class="md-list"><li><a class="md-link" href="https://baike.baidu.com/item/%E8%81%94%E5%90%88%E6%B1%BD%E8%BD%A6%E7%94%B5%E5%AD%90%E6%9C%89%E9%99%90%E5%85%AC%E5%8F%B8" target="_blank" rel="noopener">百度百科 · 联合汽车电子有限公司<span class="md-link-domain"> · baike.baidu.com</span></a> — Tier 1 企业基本面(主营业务、股权、产能、注册资本、2023 营收 370.88 亿元、2024 太仓三期)</li><li><a class="md-link" href="https://www.bing.com/search?q=%22%E8%81%94%E5%90%88%E6%B1%BD%E8%BD%A6%E7%94%B5%E5%AD%90%22+%E5%91%98%E5%B7%A5+%E4%BA%BA%E6%95%B0+%E8%A7%84%E6%A8%A1" target="_blank" rel="noopener">Bing AI 概览 · 联合汽车电子 员工人数规模<span class="md-link-domain"> · bing.com</span></a> — 引国聘/企查查:2019 年 8,740 人 / 219 亿元,2026 校招 +29%;<strong>注</strong>:AI 概览为聚合,关键数字已与原始招聘网站交叉一致</li><li><a class="md-link" href="https://www.chooseauto.com.cn" target="_blank" rel="noopener">汽车之家 · 从 1 到 4,联合电子和上汽大众从本地服务走向联合开发(熊伟铭口述)<span class="md-link-domain"> · chooseauto.com.cn</span></a> — 客户关系史(1995 年首个项目)、业务范围演变</li><li><a class="md-link" href="https://www.sohu.com/a/2025-12-18" target="_blank" rel="noopener">搜狐汽车 · 上汽新能源车逆势上扬,联合电子筑牢保供&quot;大后方&quot;<span class="md-link-domain"> · sohu.com</span></a> — 2025-12 上汽系保供角色</li><li><a class="md-link" href="https://auto.gasgoo.com/Search.aspx" target="_blank" rel="noopener">盖世汽车 · 联合电子董保利:赋能中国汽车出海(2026-05-07)<span class="md-link-domain"> · auto.gasgoo.com</span></a> — 出海战略表态</li><li><a class="md-link" href="https://www.marklines.com/cn/news" target="_blank" rel="noopener">MarkLines · 联合汽车电子芜湖工厂二期启用(2026-05-28)<span class="md-link-domain"> · marklines.com</span></a> — 2026-05-25 启用仪式;<strong>注</strong>:MarkLines 全文需登录,本条仅靠搜索摘要交叉验证</li><li><a class="md-link" href="https://news.qq.com" target="_blank" rel="noopener">腾讯新闻 · 像搭&quot;乐高&quot;一样玩转开发!联合电子引领跨域融合新范式(2026-04-24)<span class="md-link-domain"> · news.qq.com</span></a> — 北京车展跨域集成战略</li><li><a class="md-link" href="https://m.12365auto.com" target="_blank" rel="noopener">车质网 · 联合电子芜湖二期工厂正式启用(2026-05-28)<span class="md-link-domain"> · m.12365auto.com</span></a> — 产能里程碑二次确认</li><li><a class="md-link" href="https://xueqiu.com / eeo.com.cn / jiemian.com" target="_blank" rel="noopener">雪球 / 经济观察网 / 界面新闻 · 隆盛科技子公司获 UAES 20 亿元项目定点(2026-06-26 ~ 2026-07-04)<span class="md-link-domain"> · xueqiu.com </span></a> — 国产化供应链整合(分离式电机定转子 3 年 20 亿 / 2026 Q3 量产)</li><li><a class="md-link" href="https://epaper.shautonews.com" target="_blank" rel="noopener">上海汽车报 2026-02-08 · 联合电子:策马扬鞭开新局<span class="md-link-domain"> · epaper.shautonews.com</span></a> — 30 周年干部大会;<strong>上海汽车报 2026-02-01 · BMS 累计破 1,000 万件</strong> — 新能源核心产品业绩</li><li><a class="md-link" href="https://www.eechina.com / www.hkexnews.hk" target="_blank" rel="noopener">电子工程网 / HKEXnews · 英诺赛科与联合电子成立氮化镓技术联合实验室(2025-09-30)<span class="md-link-domain"> · eechina.com </span></a> — GaN 联合实验室三方合作(英诺赛科 + 纳芯微 + 联合电子)</li><li><a class="md-link" href="https://www.iguopin.com/company" target="_blank" rel="noopener">国聘 · 联合汽车电子有限公司招聘主页<span class="md-link-domain"> · iguopin.com</span></a> — 2019 营收/人数、2026 校招规模</li></ul><h3 class="sub-head">阻塞 / 未覆盖</h3><ul class="md-list"><li>🚫 <strong>bosch.com.cn/zh/our-company/bosch-in-china/our-locations/uaes/</strong> 持续 404:博世中国官方 UAES 介绍页已下线,只能通过百度百科 / 企查查 / 爱企查交叉补全主体信息</li><li>🚫 <strong>uaes.com 官网内容为空快照</strong>:浏览器抓取返回空页面,可能 JS SPA 渲染或国内网络屏蔽,<strong>Tier 1 官网实测未拿到有效内容</strong>,主要事实靠百科 + 招聘网站 + 媒体多源验证</li><li>🚫 <strong>51job.com UAES 公司页</strong> 404,招聘通道改用 hotjob.cn / 智联 / BOSS 直聘 / 职友集</li><li>🚫 <strong>MarkLines 全文</strong>需付费,芜湖二期细节只有摘要可见</li><li>🚫 <strong>Cesi.cn 联合实验室介绍页</strong>首访 SOCKET_NOT_CONNECTED,后续跳过</li><li>🚫 <strong>Tier 3 行业报告(佐思汽研 / IDC / 艾瑞)</strong>:未在公开页面找到免费摘要,Tier 3 整体覆盖率低(占 10% 预算),后续可通过订阅补</li><li>🚫 <strong>脉脉 / LinkedIn / 小红书 / 知乎 近 30 天</strong>:经必应搜索未返回 2026-08 近 30 天相关讨论,<strong>Tier 6 公共情绪信号缺失</strong>,需后续单独跑一次社交平台检索</li></ul><h3 class="sub-head">信心标签</h3><ul class="md-list"><li><strong>核心事实(主营、股权、注册、董事长 Markus Heyn、总经理熊伟铭、2025 30 周年)</strong>:🟢 <strong>高</strong> — 百度百科 + 企查查 + 爱企查 + 熊伟铭百度词条 4 源一致</li><li><strong>财务/营收(2023 = 370.88 亿元;2019 = 219 亿元 / 8,740 人)</strong>:🟡 <strong>中</strong> — 百度百科 + 国聘/企查查有公开口径;<strong>2024/2025 营收未公开</strong>,<strong>员工数 2026 当前规模为估算</strong></li><li><strong>组织(高管、技术中心布局)</strong>:🟢 <strong>高</strong> — 多源一致</li><li><strong>2026 年动态(太仓三期、芜湖二期、BMS 1,000 万件、隆盛 20 亿定点、北京车展战略)</strong>:🟢 <strong>高</strong> — 媒体二次以上确认</li><li><strong>战略转向(跨域融合 / 物理 AI / SiC/GaN 国产化)</strong>:🟡 <strong>中</strong> — 媒体公关稿为主,具体合作落地深度需在拜访现场验证</li><li><strong>Tier 6 公共情绪 / Tier 3 行业报告</strong>:🔴 <strong>低</strong> — 未覆盖</li></ul><h3 class="sub-head">实体歧义说明</h3><ul class="md-list"><li>用户提供的&quot;联合汽车电子&quot;对应 <strong>United Automotive Electronic Systems Co., Ltd. (UAES)</strong>,与同名干扰实体&quot;联合汽车&quot;等其他公司无关,本次按 UAES 推进。</li><li>公司全称 / 简称有 3 个合法写法:① 联合汽车电子有限公司(工商)② 联合电子(行业)③ UAES(英文/合资方);本简报统一使用&quot;联合汽车电子 / UAES&quot;。</li></ul><p class="md-p">*本简报由 Hermes Agent `customer-pre-brief` skill 自动生成,有效期 7 天。* *生成时间 2026-08-10 · 销售档案 / 拜访前尽调用途*</p></div></div></div></div></div></section></section></section></section></section>
+</main>
+
+<footer class="brief-foot">
+  <p>本简报由 Hermes Agent <code>customer-pre-brief</code> skill 自动生成 · 7 天有效期 · 适合销售/BD 拜访前 5 分钟速读</p>
+  <p class="muted">Generated at 2026-08-10 · 视觉与索引站保持一致</p>
+</footer>
+
+</div>
+<script>
+// scroll-spy for TOC
+(function(){
+  const secs = document.querySelectorAll('.brief-section');
+  const links = document.querySelectorAll('.toc-rail a');
+  const map = new Map();
+  secs.forEach(s => map.set(s.id, links));
+  function spy(){
+    const y = window.scrollY + 120;
+    let active = null;
+    secs.forEach(s => {
+      if (s.offsetTop <= y) active = s.id;
+    });
+    links.forEach(a => a.classList.toggle('active', a.getAttribute('href') === '#' + active));
+  }
+  window.addEventListener('scroll', spy, { passive: true });
+  spy();
+})();
+</script>
+</body>
+</html>
