@@ -26,7 +26,8 @@
     --mono:'JetBrains Mono',ui-monospace,SFMono-Regular,Menlo,monospace;
   }
   * { margin:0; padding:0; box-sizing:border-box; }
-  html { scroll-behavior:smooth; }
+  /* 不要全局 scroll-behavior:smooth - 与 JS scrollTo 叠加导致双重滚动抖动 */
+  html { /* 默认 auto */ }
   body {
     background:var(--bg); color:var(--text);
     font-family:var(--sans); font-size:15px; line-height:1.55;
@@ -483,17 +484,17 @@
     <div class="sidebar-card">
       <div class="sidebar-block">
         <div class="sidebar-label"><span class="dot"></span>行业分类</div>
-        <ul class="cat-list" id="cat-list">
-          <li><a href="#auto" class="cat-item cat-auto" data-cat="auto" aria-current="true">
+        <ul class="cat-list" id="cat-list" role="tablist" aria-label="选择行业分类">
+          <li><a href="#auto" class="cat-item cat-auto" data-cat="auto" role="tab" aria-current="true" aria-selected="true" tabindex="0">
             <span class="cat-icon">🚗</span><span class="cat-name">汽车 Tier 1</span><span class="cat-count" data-count-for="auto">—</span>
           </a></li>
-          <li><a href="#chip" class="cat-item cat-chip" data-cat="chip">
+          <li><a href="#chip" class="cat-item cat-chip" data-cat="chip" role="tab" aria-selected="false" tabindex="-1">
             <span class="cat-icon">🔌</span><span class="cat-name">芯片 / 半导体</span><span class="cat-count" data-count-for="chip">—</span>
           </a></li>
-          <li><a href="#energy" class="cat-item cat-energy" data-cat="energy">
+          <li><a href="#energy" class="cat-item cat-energy" data-cat="energy" role="tab" aria-selected="false" tabindex="-1">
             <span class="cat-icon">⚡</span><span class="cat-name">能源 / 电池</span><span class="cat-count" data-count-for="energy">—</span>
           </a></li>
-          <li><a href="#other" class="cat-item cat-other" data-cat="other">
+          <li><a href="#other" class="cat-item cat-other" data-cat="other" role="tab" aria-selected="false" tabindex="-1">
             <span class="cat-icon">🏢</span><span class="cat-name">其他</span><span class="cat-count" data-count-for="other">—</span>
           </a></li>
         </ul>
@@ -567,10 +568,10 @@
   </nav>
 
   <!-- ====== 汽车 Tier 1 ====== -->
-  <section id="auto" class="cat-section" data-briefs-count="1">
+  <section id="auto" class="cat-section" data-briefs-count="1" aria-labelledby="auto-title">
     <div class="cat-title">
       <span class="icon-disc">🚗</span>
-      <h2>汽车 Tier 1 &amp; 主机厂</h2>
+      <h2 id="auto-title">汽车 Tier 1 &amp; 主机厂</h2>
       <span class="count">1 篇</span>
       <span class="meta">active</span>
     </div>
@@ -598,10 +599,10 @@
   </section>
 
   <!-- ====== 芯片/半导体 ====== -->
-  <section id="chip" class="cat-section" data-briefs-count="0">
+  <section id="chip" class="cat-section" data-briefs-count="0" aria-labelledby="chip-title">
     <div class="cat-title chip">
       <span class="icon-disc">🔌</span>
-      <h2>芯片 / 半导体</h2>
+      <h2 id="chip-title">芯片 / 半导体</h2>
       <span class="count">0 篇</span>
       <span class="meta">pending</span>
     </div>
@@ -614,10 +615,10 @@
   </section>
 
   <!-- ====== 能源/电池 ====== -->
-  <section id="energy" class="cat-section" data-briefs-count="0">
+  <section id="energy" class="cat-section" data-briefs-count="0" aria-labelledby="energy-title">
     <div class="cat-title energy">
       <span class="icon-disc">⚡</span>
-      <h2>能源 / 电池</h2>
+      <h2 id="energy-title">能源 / 电池</h2>
       <span class="count">0 篇</span>
       <span class="meta">pending</span>
     </div>
@@ -630,10 +631,10 @@
   </section>
 
   <!-- ====== 其他 ====== -->
-  <section id="other" class="cat-section" data-briefs-count="0">
+  <section id="other" class="cat-section" data-briefs-count="0" aria-labelledby="other-title">
     <div class="cat-title other">
       <span class="icon-disc">🏢</span>
-      <h2>其他客户</h2>
+      <h2 id="other-title">其他客户</h2>
       <span class="count">0 篇</span>
       <span class="meta">pending</span>
     </div>
@@ -664,18 +665,25 @@
     document.querySelectorAll('section.cat-section').forEach(s => {
       s.classList.toggle('is-hidden', s.id !== cat);
     });
-    // 更新 sidebar 激活态 (a11y: aria-current)
+    // 更新 sidebar 激活态 (a11y: aria-current + aria-selected + roving tabindex)
     document.querySelectorAll('.cat-item').forEach(a => {
       const isActive = a.dataset.cat === cat;
       a.classList.toggle('active', isActive);
-      if (isActive) a.setAttribute('aria-current', 'true');
-      else a.removeAttribute('aria-current');
+      if (isActive) {
+        a.setAttribute('aria-current', 'true');
+        a.setAttribute('aria-selected', 'true');
+        a.setAttribute('tabindex', '0');
+      } else {
+        a.removeAttribute('aria-current');
+        a.setAttribute('aria-selected', 'false');
+        a.setAttribute('tabindex', '-1');
+      }
     });
-    // 桌面端: 如果用户滚到了下方,切换时滚回 main 顶部
+    // 桌面端: 如果用户已滚到下方,切换时滚回 main 顶部 (用 auto 避免二次滚动)
     if (window.innerWidth >= 1024) {
       const main = document.querySelector('.main');
       if (main && (window.scrollY > main.offsetTop + 200)) {
-        window.scrollTo({ top: main.offsetTop - 16, behavior: 'smooth' });
+        window.scrollTo({ top: main.offsetTop - 16, behavior: 'auto' });
       }
     }
   }
@@ -714,6 +722,29 @@
         location.hash = cat;
       }
       activate(cat);
+      a.focus(); // 把焦点保持在激活项上
+    });
+    // 方向键 ←→ 切换行业 (tablist 模式)
+    a.addEventListener('keydown', (e) => {
+      if (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight' &&
+          e.key !== 'ArrowUp' && e.key !== 'ArrowDown' &&
+          e.key !== 'Home' && e.key !== 'End') return;
+      e.preventDefault();
+      const items = Array.from(document.querySelectorAll('.cat-item'));
+      const cur = items.indexOf(a);
+      let next = cur;
+      if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') next = (cur - 1 + items.length) % items.length;
+      else if (e.key === 'ArrowRight' || e.key === 'ArrowDown') next = (cur + 1) % items.length;
+      else if (e.key === 'Home') next = 0;
+      else if (e.key === 'End') next = items.length - 1;
+      const target = items[next];
+      if (target) {
+        const cat = target.dataset.cat;
+        if (history.pushState) history.pushState(null, '', '#' + cat);
+        else location.hash = cat;
+        activate(cat);
+        target.focus();
+      }
     });
   });
 
@@ -732,7 +763,7 @@
         location.hash = cat;
       }
       activate(cat);
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+      window.scrollTo({ top: 0, behavior: 'auto' });
     });
   });
 
