@@ -104,8 +104,10 @@ def md_to_html(md: str, slug_hint: str = "") -> tuple[str, list[tuple[str, str, 
             label = SECTION_LABELS[min(section_idx - 1, len(SECTION_LABELS) - 1)] if section_idx <= len(SECTION_LABELS) else f"§{section_idx}"
             # heading 兼容 "⚡ 4. 拜访要点 3 条" 这种
             toc.append((sid, heading, icon))
+            # SPA: §1 默认显示, 其余加 .inactive (无 JS 时 CSS 用 .no-js 强制恢复)
+            active_cls = "" if section_idx == 1 else " inactive"
             out.append(
-                f'<section id="{sid}" class="brief-section sec-{color_key}" data-sec="{section_idx}">'
+                f'<section id="{sid}" role="tabpanel" aria-labelledby="tab-{sid}" class="brief-section sec-{color_key}{active_cls}" data-sec="{section_idx}">'
                 f'<header class="sec-head">'
                 f'<span class="sec-icon">{icon}</span>'
                 f'<span class="sec-num">§{section_idx}</span>'
@@ -482,6 +484,25 @@ def build_customer_nav(root_dir: Path, current_slug: str, current_date: str) -> 
     return "".join(parts)
 
 
+def render_sec_tabs(toc: "list[tuple[str, str, str]]") -> str:
+    """顶部 tab 条:与左 sidebar toc 双重入口, 与 section 一一对应"""
+    if not toc:
+        return ""
+    items = []
+    for i, (sid, heading, icon) in enumerate(toc):
+        short = re.sub(r"^\s*(?:[\W_]*\d+[\.、]?\s*)+", "", heading).strip() or heading
+        cls = "sec-tab active" if i == 0 else "sec-tab"
+        aria = ' aria-selected="true"' if i == 0 else ' aria-selected="false"'
+        tab_id = f"tab-{sid}"
+        items.append(
+            f'<button type="button" id="{tab_id}" class="{cls}" role="tab" data-target="{sid}"{aria} aria-controls="{sid} tabpanel-{sid}">'
+            f'<span class="sec-tab-icon">{icon}</span>'
+            f'<span class="sec-tab-label">{html.escape(short)}</span>'
+            f'</button>'
+        )
+    return f'<nav class="sec-tabs" role="tablist" aria-label="章节导航">{ "".join(items) }</nav>'
+
+
 def render_page(body_html: str, title: str, meta: dict, toc: "list[tuple[str, str, str]]",
                 source_date: str, source_slug: str, root_dir: Path | None = None) -> str:
     """meta: {生成时间, 调研档位, 有效期, 上一次调研, 主体确认}"""
@@ -490,6 +511,7 @@ def render_page(body_html: str, title: str, meta: dict, toc: "list[tuple[str, st
     if root_dir is None:
         root_dir = Path(__file__).resolve().parent.parent
     customer_nav_html = build_customer_nav(root_dir, source_slug, source_date)
+    sec_tabs_html = render_sec_tabs(toc)
 
     css = build_css()
 
@@ -541,6 +563,7 @@ def render_page(body_html: str, title: str, meta: dict, toc: "list[tuple[str, st
 </nav>
 
 <main class="brief-body">
+{sec_tabs_html}
 {body_html}
 </main>
 
@@ -550,24 +573,110 @@ def render_page(body_html: str, title: str, meta: dict, toc: "list[tuple[str, st
 </footer>
 
 </div>
+<noscript>
+  <style>
+    /* 无 JS 时: 隐藏顶部 tab 条, 强制所有章节显示 (退化到 v2 行为) */
+    .sec-tabs {{ display: none !important; }}
+    .brief-section.inactive {{ display: block !important; }}
+  </style>
+</noscript>
 <script>
-// scroll-spy for TOC — 联动 .active class + aria-current="location"
+// ============= SPA 章节切换 + URL hash 路由 + 双重入口联动 =============
 (function(){{
-  const secs = document.querySelectorAll('.brief-section');
-  const links = document.querySelectorAll('.toc-rail a, .sidebar-toc a');
-  function spy(){{
-    const y = window.scrollY + 120;
-    let active = null;
-    secs.forEach(s => {{ if (s.offsetTop <= y) active = s.id; }});
-    links.forEach(a => {{
-      const isActive = a.getAttribute('href') === '#' + active;
+  const sections = Array.from(document.querySelectorAll('.brief-section'));
+  const tabs = Array.from(document.querySelectorAll('.sec-tab'));
+  const tocLinks = Array.from(document.querySelectorAll('.toc-rail a, .sidebar-toc a'));
+  const firstId = sections.length ? sections[0].id : 'sec-1';
+
+  function showSection(secId){{
+    secId = secId || firstId;
+    // 找不到目标时回落第一章节
+    if (!document.getElementById(secId)) secId = firstId;
+
+    // 1. 切 section 显示
+    sections.forEach(s => {{
+      if (s.id === secId) {{
+        s.classList.remove('inactive');
+        s.setAttribute('aria-hidden', 'false');
+      }} else {{
+        s.classList.add('inactive');
+        s.setAttribute('aria-hidden', 'true');
+      }}
+    }});
+
+    // 2. 切顶部 tab 激活态 + aria-selected
+    tabs.forEach(t => {{
+      const isActive = t.dataset.target === secId;
+      t.classList.toggle('active', isActive);
+      t.setAttribute('aria-selected', isActive ? 'true' : 'false');
+      t.setAttribute('tabindex', isActive ? '0' : '-1');
+    }});
+
+    // 3. 切左/右 TOC anchor 激活态 + aria-current
+    const hash = '#' + secId;
+    tocLinks.forEach(a => {{
+      const isActive = a.getAttribute('href') === hash;
       a.classList.toggle('active', isActive);
       if (isActive) a.setAttribute('aria-current', 'location');
       else a.removeAttribute('aria-current');
     }});
+
+    // 4. 同步 URL hash (用 replaceState 避免污染历史)
+    if (location.hash !== hash) {{
+      try {{ history.replaceState(null, '', hash); }} catch (e) {{ location.hash = hash; }}
+    }}
+
+    // 5. SPA 模式下把目标 section 滚到顶 (左侧 sidebar 旁能看到), 仅在 section 距顶部较远时
+    const target = document.getElementById(secId);
+    if (target) {{
+      const rect = target.getBoundingClientRect();
+      // 只在 main 已滚动过 / 目标不在可视区内时滚动, 避免初次加载跳动
+      if (Math.abs(rect.top) > 120) {{
+        target.scrollIntoView({{ behavior: 'smooth', block: 'start' }});
+      }}
+    }}
   }}
-  window.addEventListener('scroll', spy, {{ passive: true }});
-  spy();
+
+  // ---- 顶部 tab 点击 ----
+  tabs.forEach(btn => {{
+    btn.addEventListener('click', () => showSection(btn.dataset.target));
+  }});
+
+  // ---- 左/右 sidebar TOC 点击 ----
+  tocLinks.forEach(a => {{
+    a.addEventListener('click', e => {{
+      const href = a.getAttribute('href') || '';
+      if (!href.startsWith('#')) return;
+      e.preventDefault();
+      const secId = href.slice(1);
+      showSection(secId);
+    }});
+  }});
+
+  // ---- URL hash 变化 (前进/后退 / 手动改) ----
+  window.addEventListener('hashchange', () => {{
+    showSection((location.hash || '').replace('#', '') || firstId);
+  }});
+
+  // ---- 键盘左右切换 (在 tab 上按 ←/→/Home/End) ----
+  tabs.forEach((tab, idx) => {{
+    tab.addEventListener('keydown', e => {{
+      let next = null;
+      if (e.key === 'ArrowRight') next = tabs[(idx + 1) % tabs.length];
+      else if (e.key === 'ArrowLeft') next = tabs[(idx - 1 + tabs.length) % tabs.length];
+      else if (e.key === 'Home') next = tabs[0];
+      else if (e.key === 'End') next = tabs[tabs.length - 1];
+      if (next) {{
+        e.preventDefault();
+        next.focus();
+        showSection(next.dataset.target);
+      }}
+    }});
+  }});
+
+  // ---- 初始: 读 URL hash, 否则第一章节 ----
+  const initial = (location.hash || '').replace('#', '') || firstId;
+  showSection(initial);
 }})();
 </script>
 </body>
@@ -676,7 +785,38 @@ def build_css() -> str:
   /* sections */
   .brief-section {{ background:var(--card); border:var(--border); border-radius:var(--radius);
                     padding:22px 26px; margin-bottom:24px; position:relative; overflow:hidden; }}
+  /* SPA 隐藏非激活章节 (无 JS 走 <noscript> 强制恢复) */
+  .brief-section.inactive {{ display:none; }}
   .brief-section::before {{ content:""; position:absolute; top:0; left:0; width:4px; height:100%; background:var(--section-color, var(--gray-300)); }}
+
+  /* 顶部 tab 条 — SPA 双重入口 */
+  .sec-tabs {{
+    display:flex; gap:8px; align-items:center;
+    background:var(--card); border:var(--border); border-radius:var(--radius);
+    padding:6px; margin:0 0 18px;
+    overflow-x:auto; -webkit-overflow-scrolling:touch;
+    scroll-snap-type:x proximity; scrollbar-width:thin;
+  }}
+  .sec-tabs::-webkit-scrollbar {{ height:4px; }}
+  .sec-tabs::-webkit-scrollbar-thumb {{ background:var(--gray-300); border-radius:2px; }}
+  .sec-tab {{
+    flex:0 0 auto; min-width:max-content; max-width:220px;
+    display:inline-flex; align-items:center; gap:6px;
+    padding:8px 12px; border-radius:var(--r-pill);
+    background:transparent; border:0; cursor:pointer;
+    color:var(--gray-700); font:inherit; font-size:13px; font-weight:500;
+    scroll-snap-align:start;
+    transition: background var(--dur-fast) var(--ease), color var(--dur-fast) var(--ease), transform var(--dur-fast) var(--ease), box-shadow var(--dur-fast) var(--ease);
+  }}
+  .sec-tab:hover {{ background:rgba(217,119,87,.10); color:var(--clay); }}
+  .sec-tab:focus-visible {{ outline:2px solid var(--clay); outline-offset:2px; }}
+  .sec-tab-icon {{ font-size:14px; line-height:1; }}
+  .sec-tab-label {{ white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }}
+  .sec-tab.active {{
+    background:var(--clay); color:var(--card); font-weight:600;
+    transform:translateY(-1px);
+    box-shadow:0 4px 12px rgba(217,119,87,.32), inset 0 1px 0 rgba(255,255,255,.15);
+  }}
   .sec-sky {{ --section-color: var(--sky); }}
   .sec-olive {{ --section-color: var(--olive); }}
   .sec-rust {{ --section-color: var(--rust); }}
@@ -809,6 +949,16 @@ def build_css() -> str:
     /* 桌面隐藏右侧浮动 TOC (章节搬到左侧 sidebar) */
     .toc-rail {{ display:none; }}
 
+    /* 桌面: 顶部 tab 条 sticky 在 main 头部, 跟随滚动, 章节切换更稳 */
+    .sec-tabs {{
+      position:sticky; top:0; z-index:10;
+      margin:0 0 18px;
+      background:rgba(248,247,244,.92);
+      backdrop-filter:saturate(180%) blur(10px);
+      -webkit-backdrop-filter:saturate(180%) blur(10px);
+      box-shadow:0 1px 0 var(--gray-300);
+    }}
+
     /* sidebar 在桌面独占左列 */
     .sidebar {{
       grid-column:1;
@@ -895,24 +1045,32 @@ def build_css() -> str:
     .brief-foot {{ grid-column:1/-1; }}
   }}
 
-  /* 移动端: toc-rail 改为底部固定 tab bar (不再 display:none) */
+  /* 移动端: 顶部 tab 横滑 + 隐藏旧底部 tab bar (改由顶部 tab 承担) */
   @media (max-width:820px) {{
     /* 桌面 sidebar 在移动端隐藏 */
     .sidebar {{ display:none; }}
-    .toc-rail {{
-      position:fixed; top:auto; bottom:0; left:0; right:0;
-      width:100%; max-width:100vw; margin:0; padding:8px;
-      background:var(--card); border-top:var(--border);
-      border-radius:var(--radius) var(--radius) 0 0;
-      box-shadow:0 -2px 12px rgba(0,0,0,.04);
-      z-index:50;
+
+    /* 顶部 tab 条: 横滑 + scroll-snap, 替代旧底部 tab bar */
+    .sec-tabs {{
+      position:sticky; top:0; z-index:20;
+      margin:0 -14px 16px;  /* 顶到屏幕边缘, 更横滑可见 */
+      padding:6px 14px;
+      background:rgba(248,247,244,.95);
+      backdrop-filter:saturate(180%) blur(10px);
+      -webkit-backdrop-filter:saturate(180%) blur(10px);
+      box-shadow:0 1px 0 var(--gray-300);
+      border-radius:0;
+      border-left:0; border-right:0;
+      overflow-x:auto; overflow-y:hidden;
+      scroll-snap-type:x mandatory;
+      -webkit-overflow-scrolling:touch;
     }}
-    .toc-rail-inner {{ display:flex; align-items:center; gap:6px; padding:4px 8px; }}
-    .toc-label {{ display:none; }}
-    .toc-link {{ flex:1; justify-content:center; padding:8px 4px; font-size:11px; }}
-    .toc-link .toc-text {{ display:none; }}
-    .toc-link .toc-icon {{ font-size:18px; }}
-    body {{ padding-bottom:80px; }}
+    .sec-tab {{ scroll-snap-align:start; }}
+    .sec-tab-icon {{ font-size:15px; }}
+
+    /* 旧移动底部 tab bar 不再需要 (顶部 tab 已统一入口) */
+    .toc-rail {{ display:none; }}
+    body {{ padding-bottom:32px; }}
     .dim-card {{ grid-template-columns:1fr; }}
     .dim-key {{ padding-top:0; }}
     .dim-src {{ grid-column:auto; padding-top:0; }}
