@@ -11,24 +11,126 @@
     --gray-100:#EEECE6; --gray-300:#D1CFC5; --gray-500:#87867F; --gray-700:#3D3D3A;
     --border:1.5px solid var(--gray-300);
     --radius:12px;
+    --sidebar-w:260px;
   }
   * { margin:0; padding:0; box-sizing:border-box; }
+  html { scroll-behavior:smooth; }
   body { background:var(--bg); color:var(--text); font-family:system-ui,-apple-system,"Microsoft YaHei",sans-serif;
-         font-size:15px; line-height:1.6; padding:48px 20px 80px; }
-  .page { max-width:960px; margin:0 auto; }
+         font-size:15px; line-height:1.6; padding:0 20px 80px; }
+  .page { max-width:1400px; margin:0 auto; padding:48px 0 0; }
 
-  header { text-align:center; margin-bottom:40px; }
-  h1 { font-size:32px; font-weight:600; color:var(--text); margin-bottom:6px; }
-  .subtitle { color:var(--gray-500); font-size:14px; }
+  /* ====== 桌面两栏:左 sidebar sticky + 右 main ====== */
+  .layout {
+    display:grid;
+    grid-template-columns: 1fr;
+    gap:32px;
+    align-items:start;
+  }
+  @media (min-width:1024px) {
+    .layout { grid-template-columns: var(--sidebar-w) 1fr; }
+  }
 
-  .nav { display:flex; flex-wrap:wrap; gap:8px; justify-content:center; margin-bottom:36px; }
+  /* ====== 左侧 sidebar ====== */
+  .sidebar {
+    background:transparent;
+    padding:0 0 24px;
+  }
+  @media (min-width:1024px) {
+    .sidebar {
+      position:sticky;
+      top:48px;
+      align-self:start;
+      max-height:calc(100vh - 48px);
+      overflow-y:auto;
+      padding:0 4px 24px 0;
+    }
+  }
+  .sidebar-block { margin-bottom:24px; }
+  .sidebar-label {
+    font-size:11px; font-weight:600; text-transform:uppercase;
+    color:var(--gray-500); letter-spacing:0.08em;
+    margin-bottom:10px;
+  }
+  .sidebar-divider {
+    height:1px; background:var(--gray-300); margin:18px 0;
+  }
+  .cat-list { list-style:none; display:flex; flex-direction:column; gap:4px; }
+  .cat-item {
+    display:flex; align-items:center; gap:8px;
+    padding:10px 14px; border-radius:10px;
+    text-decoration:none; color:var(--gray-700);
+    font-size:14px; font-weight:500;
+    border:1.5px solid transparent;
+    background:transparent;
+    transition:all .15s;
+    cursor:pointer;
+  }
+  .cat-item:hover { background:var(--gray-100); color:var(--text); }
+  .cat-item.active {
+    background:rgba(217,119,87,.08);
+    border-color:var(--clay);
+    color:var(--clay);
+  }
+  .cat-item.active.cat-chip { background:rgba(91,139,160,.08); border-color:var(--sky); color:var(--sky); }
+  .cat-item.active.cat-energy { background:rgba(120,140,93,.08); border-color:var(--olive); color:var(--olive); }
+  .cat-item.active.cat-other { background:rgba(135,134,127,.08); border-color:var(--gray-500); color:var(--gray-700); }
+  .cat-icon { font-size:16px; flex-shrink:0; }
+  .cat-name { flex:1; }
+  .cat-count {
+    font-size:11px; color:var(--gray-500);
+    font-family:monospace; flex-shrink:0;
+  }
+  .cat-item.active .cat-count { color:inherit; opacity:.85; }
+
+  .stat-grid { display:flex; flex-direction:column; gap:8px; }
+  .stat {
+    display:flex; align-items:baseline; justify-content:space-between;
+    padding:8px 12px; background:var(--card);
+    border:var(--border); border-radius:8px;
+  }
+  .stat-key { font-size:12px; color:var(--gray-500); }
+  .stat-val { font-size:18px; font-weight:600; color:var(--text); font-family:monospace; }
+
+  .back-link {
+    display:flex; align-items:center; gap:8px;
+    padding:10px 14px; border-radius:10px;
+    text-decoration:none; color:var(--gray-700);
+    font-size:13px; font-weight:500;
+    background:var(--card); border:var(--border);
+    transition:all .15s;
+  }
+  .back-link:hover { border-color:var(--olive); color:var(--olive); }
+  .back-link .arrow { font-size:14px; }
+
+  /* ====== 顶部 nav (移动端用) ====== */
+  .nav { display:flex; flex-wrap:wrap; gap:8px; justify-content:center; margin-bottom:24px; }
   .nav a { text-decoration:none; padding:6px 14px; border-radius:20px; font-size:13px;
            background:var(--card); border:1px solid var(--gray-300); color:var(--gray-700); transition:all .2s; }
   .nav a:hover { background:var(--gray-100); border-color:var(--clay); color:var(--clay); }
+  @media (min-width:1024px) {
+    /* 桌面端 sidebar 已经提供分类导航,隐藏顶部 nav */
+    .nav { display:none; }
+  }
 
-  section { margin-bottom:36px; }
-  .cat-title { font-size:20px; font-weight:600; color:var(--text); margin-bottom:14px; padding-bottom:6px; border-bottom:2px solid var(--gray-100); }
-  .cat-title .count { font-size:13px; font-weight:400; color:var(--gray-500); margin-left:8px; }
+  /* ====== 右侧 main ====== */
+  .main { min-width:0; }
+  header { margin-bottom:24px; }
+  h1 { font-size:32px; font-weight:600; color:var(--text); margin-bottom:6px; }
+  .subtitle { color:var(--gray-500); font-size:14px; }
+
+  .sister-strip { background:linear-gradient(135deg, rgba(120,140,93,.1), rgba(120,140,93,.02)); border-left:3px solid var(--olive); border-radius:var(--radius); padding:14px 20px; margin:20px 0 28px; display:flex; align-items:center; gap:12px; }
+  .sister-strip .sister-icon { font-size:22px; flex-shrink:0; }
+  .sister-strip .sister-body { flex:1; color:var(--text); font-size:14px; line-height:1.5; }
+  .sister-strip .sister-body strong { color:var(--olive); }
+  .sister-strip .sister-body a { color:var(--olive); text-decoration:none; font-weight:600; }
+  .sister-strip .sister-body a:hover { text-decoration:underline; }
+
+  /* ====== 行业 section (SPA 切换) ====== */
+  section.cat-section { margin-bottom:36px; }
+  .cat-section.is-hidden { display:none; }
+  .cat-title { font-size:20px; font-weight:600; color:var(--text); margin-bottom:14px; padding-bottom:6px; border-bottom:2px solid var(--gray-100); display:flex; align-items:baseline; gap:10px; }
+  .cat-title .count { font-size:13px; font-weight:400; color:var(--gray-500); margin-left:4px; }
+  .cat-title .count::before { content:"· "; opacity:.5; }
 
   .report-list { display:grid; gap:8px; }
   .report { background:var(--card); border:var(--border); border-radius:var(--radius);
@@ -54,88 +156,224 @@
     .report .date { align-self:flex-end; }
     h1 { font-size:24px; }
   }
-
-  .sister-strip { background:linear-gradient(135deg, rgba(120,140,93,.1), rgba(120,140,93,.02)); border-left:3px solid var(--olive); border-radius:var(--radius); padding:14px 20px; margin:20px 0 28px; display:flex; align-items:center; gap:12px; }
-  .sister-strip .sister-icon { font-size:22px; flex-shrink:0; }
-  .sister-strip .sister-body { flex:1; color:var(--text); font-size:14px; line-height:1.5; }
-  .sister-strip .sister-body strong { color:var(--olive); }
-  .sister-strip .sister-body a { color:var(--olive); text-decoration:none; font-weight:600; }
-  .sister-strip .sister-body a:hover { text-decoration:underline; }
 </style>
 </head>
 <body>
 <div class="page">
 
-<header>
-  <h1>📋 客户拜访前尽调简报</h1>
-  <p class="subtitle">AI 驱动 · 多源交叉验证 · 7 tier sources · 7 天有效期</p>
+<div class="layout">
 
-  <div class="sister-strip">
-    <span class="sister-icon">🏛</span>
-    <div class="sister-body">
-      <strong>姐妹产品</strong> · 调研报告集 (汽车/智驾/AI/半导体 深度调研) →
-      <a href="https://binbinao.github.io/openclaw-impact-report/" target="_blank" rel="noopener">openclaw-impact-report</a>
+  <!-- ====== 左侧 sidebar ====== -->
+  <aside class="sidebar" aria-label="行业分类导航">
+    <div class="sidebar-block">
+      <div class="sidebar-label">📂 行业分类</div>
+      <ul class="cat-list" id="cat-list">
+        <li><a href="#auto" class="cat-item cat-auto" data-cat="auto">
+          <span class="cat-icon">🚗</span><span class="cat-name">汽车 Tier 1</span><span class="cat-count" data-count-for="auto">—</span>
+        </a></li>
+        <li><a href="#chip" class="cat-item cat-chip" data-cat="chip">
+          <span class="cat-icon">🔌</span><span class="cat-name">芯片 / 半导体</span><span class="cat-count" data-count-for="chip">—</span>
+        </a></li>
+        <li><a href="#energy" class="cat-item cat-energy" data-cat="energy">
+          <span class="cat-icon">⚡</span><span class="cat-name">能源 / 电池</span><span class="cat-count" data-count-for="energy">—</span>
+        </a></li>
+        <li><a href="#other" class="cat-item cat-other" data-cat="other">
+          <span class="cat-icon">🏢</span><span class="cat-name">其他</span><span class="cat-count" data-count-for="other">—</span>
+        </a></li>
+      </ul>
     </div>
-  </div>
-</header>
 
-<nav class="nav">
-  <a href="#auto">🚗 汽车 Tier 1</a>
-  <a href="#chip">🔌 芯片/半导体</a>
-  <a href="#energy">⚡ 能源/电池</a>
-  <a href="#other">🏢 其他</a>
-</nav>
+    <div class="sidebar-divider"></div>
 
-<!-- ====== 汽车 Tier 1 ====== -->
-<section id="auto">
-  <h2 class="cat-title">🚗 汽车 Tier 1 &amp; 主机厂 <span class="count">1 篇</span></h2>
-  <div class="report-list">
-    <div class="report">
-      <span class="icon">🔧</span>
-      <div class="info">
-        <a href="联合汽车电子/2026-08-10.html">联合汽车电子 (UAES) 拜访前 AI 尽调简报</a>
-        <a class="md-fallback" href="联合汽车电子/2026-08-10.md" style="font-size:11px; color:var(--gray-500); margin-left:6px;">[MD]</a>
-        <div class="desc"><span class="tag auto">Tier 1 供应商</span><span class="tag tier1">官网/工商</span><span class="tag tier2">36Kr/腾讯/搜狐</span><span class="tag tier4">招聘/脉脉</span>博世 + 中联合资 · EMS/TCU/域控/BMS · 30 周年后再出发 · 2026 扩产 + 跨域融合 + 国产化供应链整合</div>
+    <div class="sidebar-block">
+      <div class="sidebar-label">📊 统计</div>
+      <div class="stat-grid">
+        <div class="stat">
+          <span class="stat-key">总客户</span>
+          <span class="stat-val" id="stat-clients">—</span>
+        </div>
+        <div class="stat">
+          <span class="stat-key">总简报</span>
+          <span class="stat-val" id="stat-briefs">—</span>
+        </div>
+        <div class="stat">
+          <span class="stat-key">行业覆盖</span>
+          <span class="stat-val" id="stat-cats">—</span>
+        </div>
       </div>
-      <span class="date">2026-08-10</span>
     </div>
-  </div>
-</section>
 
-<!-- ====== 芯片/半导体 ====== -->
-<section id="chip">
-  <h2 class="cat-title">🔌 芯片 / 半导体 <span class="count">0 篇</span></h2>
-  <div class="report-list">
-    <div class="report">
-      <span class="info" style="color:var(--gray-500); font-size:13px; padding:8px 0;">尚无简报,等待下一份调研。</span>
+    <div class="sidebar-divider"></div>
+
+    <div class="sidebar-block">
+      <a class="back-link" href="https://binbinao.github.io/" target="_blank" rel="noopener">
+        <span class="arrow">🔙</span> 返回 binbinao.github.io hub
+      </a>
     </div>
-  </div>
-</section>
+  </aside>
 
-<!-- ====== 能源/电池 ====== -->
-<section id="energy">
-  <h2 class="cat-title">⚡ 能源 / 电池 <span class="count">0 篇</span></h2>
-  <div class="report-list">
-    <div class="report">
-      <span class="info" style="color:var(--gray-500); font-size:13px; padding:8px 0;">尚无简报,等待下一份调研。</span>
+  <!-- ====== 右侧 main ====== -->
+  <main class="main">
+
+  <header>
+    <h1>📋 客户拜访前尽调简报</h1>
+    <p class="subtitle">AI 驱动 · 多源交叉验证 · 7 tier sources · 7 天有效期</p>
+
+    <div class="sister-strip">
+      <span class="sister-icon">🏛</span>
+      <div class="sister-body">
+        <strong>姐妹产品</strong> · 调研报告集 (汽车/智驾/AI/半导体 深度调研) →
+        <a href="https://binbinao.github.io/openclaw-impact-report/" target="_blank" rel="noopener">openclaw-impact-report</a>
+      </div>
     </div>
-  </div>
-</section>
+  </header>
 
-<!-- ====== 其他 ====== -->
-<section id="other">
-  <h2 class="cat-title">🏢 其他客户 <span class="count">0 篇</span></h2>
-  <div class="report-list">
-    <div class="report">
-      <span class="info" style="color:var(--gray-500); font-size:13px; padding:8px 0;">尚无简报,等待下一份调研。</span>
+  <nav class="nav" aria-label="移动端行业导航">
+    <a href="#auto">🚗 汽车 Tier 1</a>
+    <a href="#chip">🔌 芯片/半导体</a>
+    <a href="#energy">⚡ 能源/电池</a>
+    <a href="#other">🏢 其他</a>
+  </nav>
+
+  <!-- ====== 汽车 Tier 1 ====== -->
+  <section id="auto" class="cat-section" data-briefs-count="1">
+    <h2 class="cat-title">🚗 汽车 Tier 1 &amp; 主机厂 <span class="count">1 篇</span></h2>
+    <div class="report-list">
+      <div class="report">
+        <span class="icon">🔧</span>
+        <div class="info">
+          <a href="联合汽车电子/2026-08-10.html">联合汽车电子 (UAES) 拜访前 AI 尽调简报</a>
+          <a class="md-fallback" href="联合汽车电子/2026-08-10.md" style="font-size:11px; color:var(--gray-500); margin-left:6px;">[MD]</a>
+          <div class="desc"><span class="tag auto">Tier 1 供应商</span><span class="tag tier1">官网/工商</span><span class="tag tier2">36Kr/腾讯/搜狐</span><span class="tag tier4">招聘/脉脉</span>博世 + 中联合资 · EMS/TCU/域控/BMS · 30 周年后再出发 · 2026 扩产 + 跨域融合 + 国产化供应链整合</div>
+        </div>
+        <span class="date">2026-08-10</span>
+      </div>
     </div>
-  </div>
-</section>
+  </section>
 
-<footer>
-  📦 自动生成于 2026-08-10 · 由 <code>/prebrief</code> 触发 · GitHub Pages 自动部署
-</footer>
+  <!-- ====== 芯片/半导体 ====== -->
+  <section id="chip" class="cat-section" data-briefs-count="0">
+    <h2 class="cat-title">🔌 芯片 / 半导体 <span class="count">0 篇</span></h2>
+    <div class="report-list">
+      <div class="report">
+        <span class="info" style="color:var(--gray-500); font-size:13px; padding:8px 0;">尚无简报,等待下一份调研。</span>
+      </div>
+    </div>
+  </section>
 
+  <!-- ====== 能源/电池 ====== -->
+  <section id="energy" class="cat-section" data-briefs-count="0">
+    <h2 class="cat-title">⚡ 能源 / 电池 <span class="count">0 篇</span></h2>
+    <div class="report-list">
+      <div class="report">
+        <span class="info" style="color:var(--gray-500); font-size:13px; padding:8px 0;">尚无简报,等待下一份调研。</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ====== 其他 ====== -->
+  <section id="other" class="cat-section" data-briefs-count="0">
+    <h2 class="cat-title">🏢 其他客户 <span class="count">0 篇</span></h2>
+    <div class="report-list">
+      <div class="report">
+        <span class="info" style="color:var(--gray-500); font-size:13px; padding:8px 0;">尚无简报,等待下一份调研。</span>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    📦 自动生成于 2026-08-10 · 由 <code>/prebrief</code> 触发 · GitHub Pages 自动部署
+  </footer>
+
+  </main>
 </div>
+
+<script>
+// ====== SPA 行业切换: hash 驱动 ======
+(function() {
+  const VALID = ['auto', 'chip', 'energy', 'other'];
+  const DEFAULT = 'auto';
+
+  function activate(cat) {
+    if (!VALID.includes(cat)) cat = DEFAULT;
+    // 隐藏所有 section
+    document.querySelectorAll('section.cat-section').forEach(s => {
+      s.classList.toggle('is-hidden', s.id !== cat);
+    });
+    // 更新 sidebar 激活态
+    document.querySelectorAll('.cat-item').forEach(a => {
+      a.classList.toggle('active', a.dataset.cat === cat);
+    });
+    // 滚动到 main 顶部 (桌面端) / 不滚动 (移动端,避免 hash 锚点跳动)
+    if (window.innerWidth >= 1024) {
+      const main = document.querySelector('.main');
+      if (main && (window.scrollY > main.offsetTop + 200)) {
+        // 用户已滚动到下方,切换分类时回到 main 顶部
+        window.scrollTo({ top: main.offsetTop - 16, behavior: 'smooth' });
+      }
+    }
+  }
+
+  // 行业统计: 扫各 section 的 data-briefs-count
+  function renderStats() {
+    let totalBriefs = 0;
+    let coveredCats = 0;
+    const uniqueClients = new Set();
+    document.querySelectorAll('section.cat-section').forEach(s => {
+      const cat = s.id;
+      const n = parseInt(s.dataset.briefsCount || '0', 10);
+      const clientsInCat = parseInt(s.dataset.clientsCount || '1', 10);
+      uniqueClients.add(cat);
+      totalBriefs += n;
+      if (n > 0) coveredCats++;
+      // 写到 sidebar 计数
+      const c = document.querySelector(`.cat-count[data-count-for="${cat}"]`);
+      if (c) c.textContent = `${clientsInCat} 客户 · ${n} 篇`;
+    });
+    document.getElementById('stat-clients').textContent = uniqueClients.size;
+    document.getElementById('stat-briefs').textContent = totalBriefs;
+    document.getElementById('stat-cats').textContent = `${coveredCats} / ${VALID.length}`;
+  }
+
+  // 拦截 sidebar 点击: 阻止默认 scroll, 用 smooth 切换
+  document.querySelectorAll('.cat-item').forEach(a => {
+    a.addEventListener('click', (e) => {
+      e.preventDefault();
+      const cat = a.dataset.cat;
+      if (history.pushState) {
+        history.pushState(null, '', '#' + cat);
+      } else {
+        location.hash = cat;
+      }
+      activate(cat);
+    });
+  });
+
+  // 监听 hashchange (浏览器后退/前进 / 手动改 URL)
+  window.addEventListener('hashchange', () => {
+    activate(location.hash.replace('#', '') || DEFAULT);
+  });
+
+  // 拦截 nav 链接 (移动端): 同样 SPA 切换
+  document.querySelectorAll('.nav a').forEach(a => {
+    a.addEventListener('click', (e) => {
+      e.preventDefault();
+      const cat = a.getAttribute('href').replace('#', '') || DEFAULT;
+      if (history.pushState) {
+        history.pushState(null, '', '#' + cat);
+      } else {
+        location.hash = cat;
+      }
+      activate(cat);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+  });
+
+  // 初始化
+  renderStats();
+  activate(location.hash.replace('#', '') || DEFAULT);
+})();
+</script>
+
 </body>
 </html>
