@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>客户拜访前尽调简报 · Hermes Agent</title>
+<style>
+  :root {
+    --bg:#F8F7F4; --card:#FFFFFF; --text:#141413;
+    --clay:#D97757; --olive:#788C5D; --rust:#B04A3F; --sky:#5B8BA0; --purple:#8B6B9E;
+    --gray-100:#EEECE6; --gray-300:#D1CFC5; --gray-500:#87867F; --gray-700:#3D3D3A;
+    --border:1.5px solid var(--gray-300);
+    --radius:12px;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { background:var(--bg); color:var(--text); font-family:system-ui,-apple-system,"Microsoft YaHei",sans-serif;
+         font-size:15px; line-height:1.6; padding:48px 20px 80px; }
+  .page { max-width:960px; margin:0 auto; }
+
+  header { text-align:center; margin-bottom:40px; }
+  h1 { font-size:32px; font-weight:600; color:var(--text); margin-bottom:6px; }
+  .subtitle { color:var(--gray-500); font-size:14px; }
+
+  .nav { display:flex; flex-wrap:wrap; gap:8px; justify-content:center; margin-bottom:36px; }
+  .nav a { text-decoration:none; padding:6px 14px; border-radius:20px; font-size:13px;
+           background:var(--card); border:1px solid var(--gray-300); color:var(--gray-700); transition:all .2s; }
+  .nav a:hover { background:var(--gray-100); border-color:var(--clay); color:var(--clay); }
+
+  section { margin-bottom:36px; }
+  .cat-title { font-size:20px; font-weight:600; color:var(--text); margin-bottom:14px; padding-bottom:6px; border-bottom:2px solid var(--gray-100); }
+  .cat-title .count { font-size:13px; font-weight:400; color:var(--gray-500); margin-left:8px; }
+
+  .report-list { display:grid; gap:8px; }
+  .report { background:var(--card); border:var(--border); border-radius:var(--radius);
+            padding:14px 18px; display:flex; align-items:center; gap:14px; transition:all .15s; }
+  .report:hover { border-color:var(--clay); box-shadow:0 2px 6px rgba(0,0,0,.04); }
+  .report .icon { font-size:20px; flex-shrink:0; width:32px; text-align:center; }
+  .report .info { flex:1; min-width:0; }
+  .report .info a { color:var(--text); text-decoration:none; font-size:14px; font-weight:500; }
+  .report .info a:hover { color:var(--clay); }
+  .report .info .desc { color:var(--gray-500); font-size:12px; margin-top:2px; }
+  .report .date { flex-shrink:0; font-size:11px; color:var(--gray-500); font-family:monospace; }
+
+  .tag { display:inline-block; padding:2px 8px; border-radius:4px; font-size:11px; margin-right:4px; }
+  .tag.auto { background:rgba(91,139,160,.12); color:var(--sky); }
+  .tag.tier1 { background:rgba(120,140,93,.12); color:var(--olive); }
+  .tag.tier2 { background:rgba(91,139,160,.12); color:var(--sky); }
+  .tag.tier4 { background:rgba(217,119,87,.12); color:var(--clay); }
+
+  footer { text-align:center; margin-top:48px; color:var(--gray-500); font-size:13px; }
+
+  @media (max-width:600px) {
+    .report { flex-direction:column; align-items:flex-start; gap:6px; }
+    .report .date { align-self:flex-end; }
+    h1 { font-size:24px; }
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+<header>
+  <h1>📋 客户拜访前尽调简报</h1>
+  <p class="subtitle">AI 驱动 · 多源交叉验证 · 7 tier sources · 7 天有效期</p>
+</header>
+
+<nav class="nav">
+  <a href="#auto">🚗 汽车 Tier 1</a>
+  <a href="#chip">🔌 芯片/半导体</a>
+  <a href="#energy">⚡ 能源/电池</a>
+  <a href="#other">🏢 其他</a>
+</nav>
+
+<!-- ====== 汽车 Tier 1 ====== -->
+<section id="auto">
+  <h2 class="cat-title">🚗 汽车 Tier 1 &amp; 主机厂 <span class="count">1 篇</span></h2>
+  <div class="report-list">
+    <div class="report">
+      <span class="icon">🔧</span>
+      <div class="info">
+        <a href="联合汽车电子/2026-08-10.md">联合汽车电子 (UAES) 拜访前 AI 尽调简报</a>
+        <div class="desc"><span class="tag auto">Tier 1 供应商</span><span class="tag tier1">官网/工商</span><span class="tag tier2">36Kr/腾讯/搜狐</span><span class="tag tier4">招聘/脉脉</span>博世 + 中联合资 · EMS/TCU/域控/BMS · 30 周年后再出发 · 2026 扩产 + 跨域融合 + 国产化供应链整合</div>
+      </div>
+      <span class="date">2026-08-10</span>
+    </div>
+  </div>
+</section>
+
+<!-- ====== 芯片/半导体 ====== -->
+<section id="chip">
+  <h2 class="cat-title">🔌 芯片 / 半导体 <span class="count">0 篇</span></h2>
+  <div class="report-list">
+    <div class="report">
+      <span class="info" style="color:var(--gray-500); font-size:13px; padding:8px 0;">尚无简报,等待下一份调研。</span>
+    </div>
+  </div>
+</section>
+
+<!-- ====== 能源/电池 ====== -->
+<section id="energy">
+  <h2 class="cat-title">⚡ 能源 / 电池 <span class="count">0 篇</span></h2>
+  <div class="report-list">
+    <div class="report">
+      <span class="info" style="color:var(--gray-500); font-size:13px; padding:8px 0;">尚无简报,等待下一份调研。</span>
+    </div>
+  </div>
+</section>
+
+<!-- ====== 其他 ====== -->
+<section id="other">
+  <h2 class="cat-title">🏢 其他客户 <span class="count">0 篇</span></h2>
+  <div class="report-list">
+    <div class="report">
+      <span class="info" style="color:var(--gray-500); font-size:13px; padding:8px 0;">尚无简报,等待下一份调研。</span>
+    </div>
+  </div>
+</section>
+
+<footer>
+  📦 自动生成于 2026-08-10 · 由 <code>/prebrief</code> 触发 · GitHub Pages 自动部署
+</footer>
+
+</div>
+</body>
+</html>
