@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>世纪华通 拜访前 AI 尽调简报 · 客户尽调简报</title>
+<style>
+  :root {
+    --bg: #F8F7F4; --card: #FFFFFF; --text: #141413;
+    --clay: #D97757; --olive: #788C5D; --rust: #B04A3F;
+    --sky: #5B8BA0; --purple: #8B6B9E;
+    --gray-100: #EEECE6; --gray-300: #D1CFC5;
+    --gray-500: #87867F; --gray-700: #3D3D3A;
+    --border: 1.5px solid var(--gray-300);
+    --radius: 12px;
+    --r-sm: 8px;     /* dim-card / tl-item / quote-banner */
+    --r-md: 14px;    /* visit-card / sec-body li 重点卡 */
+    --r-lg: 18px;    /* visit-card 当前已 14, 保留 */
+    --r-pill: 999px; /* meta-item / btn */
+    --ease: cubic-bezier(0.16, 1, 0.3, 1);
+    --dur-fast: 150ms;
+    --dur-base: 250ms;
+  }
+
+  /* ===== a11y: 全局 :focus-visible 描边 (skill 强制要求) ===== */
+  *:focus-visible {
+    outline: 2px solid var(--clay);
+    outline-offset: 2px;
+  }
+  /* 不改 border-radius (skill 警告:会破坏 pill 几何) */
+  a:focus-visible, button:focus-visible, .toc-link:focus-visible, .btn:focus-visible {
+    outline-offset: 3px;
+  }
+
+  /* ===== a11y: 前庭敏感用户关闭所有过渡 ===== */
+  @media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  html { scroll-behavior: smooth; }
+  body { background:var(--bg); color:var(--text); font-family:system-ui,-apple-system,"Microsoft YaHei",sans-serif;
+         font-size:15px; line-height:1.65; padding:32px 20px 80px; }
+  .page { max-width:980px; margin:0 auto; position:relative; }
+
+  /* header */
+  .brief-header { text-align:center; margin-bottom:32px; padding-bottom:24px; border-bottom:var(--border); }
+  .brief-kicker { font-size:12px; letter-spacing:.18em; color:var(--gray-500); text-transform:uppercase; margin-bottom:8px; }
+  .brief-title { font-size:30px; font-weight:600; color:var(--text); margin-bottom:14px; line-height:1.3; }
+  .brief-meta { display:flex; flex-wrap:wrap; gap:10px 18px; justify-content:center; margin-bottom:18px; }
+  .meta-item { display:inline-flex; align-items:center; gap:6px; padding:6px 12px; background:var(--card); border:var(--border); border-radius:20px; font-size:13px; }
+  .meta-icon { font-size:13px; }
+  .meta-key { color:var(--gray-500); font-size:12px; }
+  .meta-val { color:var(--text); font-weight:500; }
+  .brief-actions { display:flex; gap:8px; justify-content:center; flex-wrap:wrap; }
+  .btn { display:inline-block; padding:6px 14px; border-radius:18px; font-size:13px; text-decoration:none; transition:all .2s; }
+  .btn-ghost { background:var(--card); border:var(--border); color:var(--gray-700); }
+  .btn-ghost:hover { border-color:var(--clay); color:var(--clay); background:var(--gray-100); }
+
+  /* TOC rail */
+  .toc-rail { position:sticky; top:24px; float:right; width:200px; margin:0 0 24px 24px; z-index:5; }
+  .toc-rail-inner { background:var(--card); border:var(--border); border-radius:var(--radius); padding:14px 12px; }
+  .toc-label { font-size:11px; color:var(--gray-500); text-transform:uppercase; letter-spacing:.15em; margin-bottom:10px; padding-left:4px; }
+  .toc-link { display:flex; align-items:center; gap:8px; padding:7px 8px; border-radius:8px; font-size:13px; color:var(--gray-700); text-decoration:none; transition:all .15s; }
+  .toc-link:hover { background:var(--gray-100); color:var(--text); }
+  .toc-link.active { background:rgba(217,119,87,.1); color:var(--clay); font-weight:600; }
+  .toc-icon { flex-shrink:0; font-size:14px; }
+  .toc-text { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+
+  /* main */
+  .brief-body { max-width:740px; }
+
+  /* sections */
+  .brief-section { background:var(--card); border:var(--border); border-radius:var(--radius);
+                    padding:22px 26px; margin-bottom:24px; position:relative; overflow:hidden; }
+  /* SPA 隐藏非激活章节 (无 JS 走 <noscript> 强制恢复) */
+  .brief-section.inactive { display:none; }
+  .brief-section::before { content:""; position:absolute; top:0; left:0; width:4px; height:100%; background:var(--section-color, var(--gray-300)); }
+
+  /* 顶部 tab 条 — SPA 双重入口 */
+  .sec-tabs {
+    display:flex; gap:8px; align-items:center;
+    background:var(--card); border:var(--border); border-radius:var(--radius);
+    padding:6px; margin:0 0 18px;
+    overflow-x:auto; -webkit-overflow-scrolling:touch;
+    scroll-snap-type:x proximity; scrollbar-width:thin;
+  }
+  .sec-tabs::-webkit-scrollbar { height:4px; }
+  .sec-tabs::-webkit-scrollbar-thumb { background:var(--gray-300); border-radius:2px; }
+  .sec-tab {
+    flex:0 0 auto; min-width:max-content; max-width:220px;
+    display:inline-flex; align-items:center; gap:6px;
+    padding:8px 12px; border-radius:var(--r-pill);
+    background:transparent; border:0; cursor:pointer;
+    color:var(--gray-700); font:inherit; font-size:13px; font-weight:500;
+    scroll-snap-align:start;
+    transition: background var(--dur-fast) var(--ease), color var(--dur-fast) var(--ease), transform var(--dur-fast) var(--ease), box-shadow var(--dur-fast) var(--ease);
+  }
+  .sec-tab:hover { background:rgba(217,119,87,.10); color:var(--clay); }
+  .sec-tab:focus-visible { outline:2px solid var(--clay); outline-offset:2px; }
+  .sec-tab-icon { font-size:14px; line-height:1; }
+  .sec-tab-label { white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .sec-tab.active {
+    background:var(--clay); color:var(--card); font-weight:600;
+    transform:translateY(-1px);
+    box-shadow:0 4px 12px rgba(217,119,87,.32), inset 0 1px 0 rgba(255,255,255,.15);
+  }
+  .sec-sky { --section-color: var(--sky); }
+  .sec-olive { --section-color: var(--olive); }
+  .sec-rust { --section-color: var(--rust); }
+  .sec-clay { --section-color: var(--clay); }
+  .sec-gray500 { --section-color: var(--gray-500); }
+
+  .sec-head { display:flex; align-items:center; gap:10px; margin-bottom:16px; padding-bottom:12px; border-bottom:1px dashed var(--gray-300); }
+  .sec-icon { font-size:22px; flex-shrink:0; }
+  .sec-num { font-size:11px; color:var(--gray-500); font-family:monospace; letter-spacing:.1em; padding:3px 7px; background:var(--gray-100); border-radius:4px; }
+  .sec-title { font-size:20px; font-weight:600; color:var(--text); flex:1; }
+  .sec-tag { font-size:11px; color:var(--gray-500); padding:3px 8px; border:1px solid var(--gray-300); border-radius:10px; }
+  .sec-body { color:var(--text); }
+
+  .sub-head { font-size:16px; font-weight:600; color:var(--text); margin:18px 0 10px; padding-left:10px; border-left:3px solid var(--sky); }
+  .micro-head { font-size:14px; font-weight:600; color:var(--gray-700); margin:14px 0 6px; }
+
+  /* paragraphs */
+  .md-p { margin-bottom:10px; color:var(--gray-700); }
+  .md-p strong, .tl-event strong, .visit-text strong, .dim-val strong { color:var(--text); font-weight:600; }
+
+  /* md links */
+  .md-link { color:var(--sky); text-decoration:none; border-bottom:1px solid rgba(91,139,160,.3); transition:all .15s; }
+  .md-link:hover { color:var(--clay); border-bottom-color:var(--clay); }
+  .md-link-domain { font-size:11px; color:var(--gray-500); margin-left:2px; }
+
+  /* lists */
+  .md-list { padding-left:20px; margin:8px 0; color:var(--gray-700); }
+  .md-list li { margin-bottom:4px; }
+  .md-list.num { padding-left:24px; }
+
+  /* blockquote banners */
+  .quote-banner { display:flex; gap:12px; align-items:flex-start; padding:12px 16px; border-radius:10px;
+                   margin:12px 0; font-size:14px; line-height:1.6; border:1.5px solid; }
+  .quote-banner .q-icon { font-size:18px; flex-shrink:0; line-height:1.6; }
+  .quote-banner .q-body { flex:1; }
+  .q-sky { background:rgba(91,139,160,.08); border-color:rgba(91,139,160,.4); color:var(--text); }
+  .q-olive { background:rgba(120,140,93,.08); border-color:rgba(120,140,93,.4); color:var(--text); }
+  .q-clay { background:rgba(217,119,87,.1); border-color:rgba(217,119,87,.5); color:var(--text); font-weight:500; }
+  .q-rust { background:rgba(176,74,63,.08); border-color:rgba(176,74,63,.4); color:var(--text); }
+  .q-clay strong, .q-rust strong { color:inherit; }
+
+  /* dim grid (§1 §2) */
+  .dim-grid { display:grid; gap:10px; margin-top:8px; }
+  .dim-card { display:grid; grid-template-columns:120px 1fr 200px; gap:14px;
+               padding:14px 16px; background:var(--bg); border-radius:8px; border:1px solid var(--gray-100);
+               transition:all .15s; align-items:start; min-height:64px; }
+  .dim-card:hover, .dim-card:focus-within { border-color:var(--clay); background:var(--card); }
+  .dim-card .dim-group { display:inline-block; font-size:10px; padding:1px 6px; border-radius:3px;
+                          background:var(--gray-100); color:var(--gray-500); margin-bottom:4px; }
+  .dim-card.gov { border-left:3px solid var(--olive); }
+  .dim-card.cap { border-left:3px solid var(--purple); }
+  .dim-key { color:var(--sky); font-weight:600; font-size:13px; padding-top:2px; }
+  .dim-val { color:var(--text); font-size:14px; line-height:1.65; }
+  .dim-val strong { color:var(--clay); }
+  .dim-src { color:var(--gray-500); font-size:11px; padding-top:4px; font-family:monospace;
+              word-break:break-all; }
+
+  /* timeline (§3) */
+  .timeline { position:relative; padding-left:8px; margin-top:6px; }
+  .timeline::before { content:""; position:absolute; left:80px; top:8px; bottom:8px; width:2px; background:var(--gray-300); }
+  .tl-item { display:grid; grid-template-columns:74px 110px 1fr; gap:14px;
+              padding:10px 12px; margin-bottom:8px; border-radius:8px; transition:all .15s;
+              align-items:start; position:relative; }
+  .tl-item:hover { background:var(--bg); }
+  .tl-item::before { content:""; position:absolute; left:78px; top:16px; width:8px; height:8px; border-radius:50%; background:var(--clay); border:2px solid var(--card); }
+  .tl-date { font-family:monospace; color:var(--sky); font-weight:600; font-size:13px; padding-top:1px; }
+  .tl-cat { font-size:11px; padding:3px 8px; border-radius:10px; display:inline-block; text-align:center; font-weight:500; }
+  .cat-rust { background:rgba(176,74,63,.12); color:var(--rust); }
+  .cat-clay { background:rgba(217,119,87,.12); color:var(--clay); }
+  .cat-olive { background:rgba(120,140,93,.12); color:var(--olive); }
+  .cat-sky { background:rgba(91,139,160,.12); color:var(--sky); }
+  .cat-purple { background:rgba(139,107,158,.12); color:var(--purple); }
+  .cat-gray500 { background:var(--gray-100); color:var(--gray-500); }
+  .tl-event { color:var(--text); font-size:14px; line-height:1.6; }
+  .tl-event strong { color:var(--clay); }
+  .tl-src { grid-column:1/-1; padding-left:200px; color:var(--gray-500); font-size:11px; font-family:monospace; }
+
+  /* visit list (§4) */
+  .visit-list { list-style:none; padding:0; margin:0; counter-reset:visit; }
+  .visit-card { display:grid; grid-template-columns:60px 1fr; gap:14px; padding:16px 18px;
+                 margin-bottom:12px; border-radius:14px;
+                 background:linear-gradient(135deg, rgba(217,119,87,.14), rgba(217,119,87,.04));
+                 border:2px solid rgba(217,119,87,.45);
+                 box-shadow:0 4px 14px rgba(217,119,87,.08);
+                 position:relative; transition:transform var(--dur-fast) var(--ease), box-shadow var(--dur-fast) var(--ease); }
+  .visit-card:hover, .visit-card:focus-within { border-color:var(--clay); box-shadow:0 8px 22px rgba(217,119,87,.18); transform:translateY(-1px); }
+  .visit-num { font-family:"Georgia",serif; font-size:42px; font-weight:700; color:var(--clay); line-height:1; padding-top:2px; letter-spacing:-.02em; }
+  .visit-body { color:var(--text); }
+  .visit-title { font-weight:600; font-size:15px; color:var(--text); margin-bottom:6px; }
+  .visit-text { font-size:13.5px; color:var(--gray-700); line-height:1.7; }
+  .visit-text strong { color:var(--clay); }
+  .visit-sub { font-size:13px; color:var(--gray-700); line-height:1.7; margin-top:6px; padding-left:10px; border-left:2px solid rgba(217,119,87,.3); }
+  .visit-sub strong { color:var(--clay); }
+  .visit-sub::before { content:"· "; color:var(--clay); font-weight:bold; margin-right:4px; }
+
+  /* raw table fallback */
+  .raw-table-wrap { overflow-x:auto; margin:10px 0; }
+  .raw-table { width:100%; border-collapse:collapse; font-size:13px; }
+  .raw-table th, .raw-table td { padding:8px 10px; border:1px solid var(--gray-300); text-align:left; }
+  .raw-table th { background:var(--gray-100); font-weight:600; }
+
+  /* source link styles (§5) */
+  .sec-body ul.md-list { list-style:none; padding:0; }
+  .sec-body ul.md-list li { padding:10px 14px; margin-bottom:8px; background:var(--bg); border-radius:8px; border:1px solid var(--gray-100); }
+  .sec-body ul.md-list li:hover { border-color:var(--sky); }
+  /* 来源区文字提亮到 gray-700 (4.5:1 AA 通过,原 gray-500 只有 3.0:1) */
+  .sec-body ul.md-list li, .sec-body ul.md-list li * { color:var(--gray-700); }
+  .sec-body .md-link { color:var(--sky); }
+
+  /* footer */
+  .brief-foot { text-align:center; margin-top:40px; padding-top:24px; border-top:var(--border); color:var(--gray-500); font-size:13px; }
+  .brief-foot .muted { margin-top:6px; font-size:11px; }
+  .brief-foot code { background:var(--gray-100); padding:1px 6px; border-radius:4px; font-size:12px; color:var(--gray-700); }
+
+  /* responsive */
+  /* 中等屏幕: dim-card 中间档 */
+  @media (max-width:980px) {
+    .dim-card { grid-template-columns:100px 1fr 160px; }
+    .toc-rail { width:min(200px, 22vw); }
+  }
+
+  /* ===========================
+   * 桌面 ≥1024px: 左右两栏布局
+   * =========================== */
+  @media (min-width:1024px) {
+    .page { max-width:1180px; display:grid; grid-template-columns:320px 1fr; column-gap:40px; row-gap:0; align-items:start; padding-top:8px; }
+    .brief-header { grid-column:1/-1; }
+    .brief-body { grid-column:2; max-width:760px; min-width:0; }
+
+    /* 桌面隐藏右侧浮动 TOC (章节搬到左侧 sidebar) */
+    .toc-rail { display:none; }
+
+    /* 桌面: 顶部 tab 条 sticky 在 main 头部, 跟随滚动, 章节切换更稳 */
+    .sec-tabs {
+      position:sticky; top:0; z-index:10;
+      margin:0 0 18px;
+      background:rgba(248,247,244,.92);
+      backdrop-filter:saturate(180%) blur(10px);
+      -webkit-backdrop-filter:saturate(180%) blur(10px);
+      box-shadow:0 1px 0 var(--gray-300);
+    }
+
+    /* sidebar 在桌面独占左列 */
+    .sidebar {
+      grid-column:1;
+      position:sticky;
+      top:24px;
+      align-self:start;
+      max-height:calc(100vh - 48px);
+      overflow-y:auto;
+      padding-right:4px;
+      margin-bottom:32px;
+    }
+    .sidebar-inner {
+      display:flex;
+      flex-direction:column;
+      gap:18px;
+    }
+    .sidebar-block {
+      background:var(--card);
+      border:var(--border);
+      border-radius:var(--radius);
+      padding:14px 14px;
+    }
+    .sidebar-label {
+      font-size:11px;
+      color:var(--gray-500);
+      text-transform:uppercase;
+      letter-spacing:.15em;
+      margin-bottom:10px;
+      padding:0 4px;
+      font-weight:600;
+    }
+
+    /* 章节 toc-link (复用现有样式, 在 sidebar 内显示) */
+    .sidebar-toc .toc-link { display:flex; }
+
+    /* 客户导航 */
+    .sidebar-nav .nav-group-label {
+      font-size:11px;
+      color:var(--gray-700);
+      font-weight:600;
+      letter-spacing:.04em;
+      padding:6px 6px 4px;
+      margin-top:4px;
+    }
+    .sidebar-nav .nav-list { list-style:none; padding:0; margin:0 0 4px; }
+    .sidebar-nav .nav-list li { margin:0; }
+    .nav-link {
+      display:grid;
+      grid-template-columns:18px 1fr auto;
+      align-items:center;
+      gap:8px;
+      padding:7px 8px;
+      border-radius:8px;
+      font-size:13px;
+      color:var(--gray-700);
+      text-decoration:none;
+      transition:all .15s;
+    }
+    .nav-link:hover { background:var(--gray-100); color:var(--text); }
+    .nav-link.active { background:rgba(217,119,87,.12); color:var(--clay); font-weight:600; }
+    .nav-link.active .nav-emoji { filter:drop-shadow(0 0 1px rgba(217,119,87,.5)); }
+    .nav-emoji { font-size:14px; }
+    .nav-name { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+    .nav-date { font-family:monospace; font-size:11px; color:var(--gray-500); }
+
+    /* 返回主页块 */
+    .sidebar-back { padding:10px 12px; }
+    .sidebar-back-link {
+      display:flex; align-items:center; justify-content:center;
+      gap:6px;
+      padding:10px 14px;
+      background:var(--bg);
+      border:1.5px solid var(--gray-300);
+      border-radius:10px;
+      color:var(--gray-700);
+      font-size:13px;
+      font-weight:500;
+      text-decoration:none;
+      transition:all .15s;
+    }
+    .sidebar-back-link:hover { border-color:var(--clay); color:var(--clay); background:var(--gray-100); }
+
+    /* footer 跨两列 */
+    .brief-foot { grid-column:1/-1; }
+  }
+
+  /* 移动端: 顶部 tab 横滑 + 隐藏旧底部 tab bar (改由顶部 tab 承担) */
+  @media (max-width:820px) {
+    /* 桌面 sidebar 在移动端隐藏 */
+    .sidebar { display:none; }
+
+    /* 顶部 tab 条: 横滑 + scroll-snap, 替代旧底部 tab bar */
+    .sec-tabs {
+      position:sticky; top:0; z-index:20;
+      margin:0 -14px 16px;  /* 顶到屏幕边缘, 更横滑可见 */
+      padding:6px 14px;
+      background:rgba(248,247,244,.95);
+      backdrop-filter:saturate(180%) blur(10px);
+      -webkit-backdrop-filter:saturate(180%) blur(10px);
+      box-shadow:0 1px 0 var(--gray-300);
+      border-radius:0;
+      border-left:0; border-right:0;
+      overflow-x:auto; overflow-y:hidden;
+      scroll-snap-type:x mandatory;
+      -webkit-overflow-scrolling:touch;
+    }
+    .sec-tab { scroll-snap-align:start; }
+    .sec-tab-icon { font-size:15px; }
+
+    /* 旧移动底部 tab bar 不再需要 (顶部 tab 已统一入口) */
+    .toc-rail { display:none; }
+    body { padding-bottom:32px; }
+    .dim-card { grid-template-columns:1fr; }
+    .dim-key { padding-top:0; }
+    .dim-src { grid-column:auto; padding-top:0; }
+    .timeline::before { left:14px; }
+    .tl-item { grid-template-columns:1fr; gap:4px; }
+    .tl-item::before { display:none; }
+    .tl-src { padding-left:0; grid-column:auto; }
+  }
+  @media (max-width:600px) {
+    body { padding:20px 14px 100px; }
+    .brief-title { font-size:22px; }
+    .brief-section { padding:18px 18px; }
+    .visit-card { grid-template-columns:1fr; }
+    .visit-num { font-size:24px; }
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+<header class="brief-header">
+  <div class="brief-kicker">📋 Customer Pre-Visit Briefing</div>
+  <h1 class="brief-title">世纪华通 拜访前 AI 尽调简报</h1>
+  <div class="brief-meta">
+    <div class="meta-item"><span class="meta-icon">🕐</span><span class="meta-key">生成时间</span><span class="meta-val">2026-09-28 19:35</span></div><div class="meta-item"><span class="meta-icon">🔬</span><span class="meta-key">调研档位</span><span class="meta-val">Deep (~20 min · 7 tier sources)</span></div><div class="meta-item"><span class="meta-icon">📅</span><span class="meta-key">有效期</span><span class="meta-val">7 天</span></div><div class="meta-item"><span class="meta-icon">🔁</span><span class="meta-key">上一次调研</span><span class="meta-val">无</span></div>
+  </div>
+  <div class="brief-actions">
+    <a class="btn btn-ghost" href="https://github.com/binbinao/customer-pre-briefs/tree/main/世纪华通/2026-09-28.md">📝 查看 Markdown 源</a>
+    <a class="btn btn-ghost" href="https://github.com/binbinao/customer-pre-briefs/commit/main" target="_blank" rel="noopener">🔗 提交历史</a>
+    <a class="btn btn-ghost" href="/customer-pre-briefs/">← 返回简报索引</a>
+  </div>
+</header>
+
+<aside class="sidebar" aria-label="详情页导航">
+  <div class="sidebar-inner">
+    <section class="sidebar-block sidebar-toc">
+      <div class="sidebar-label">📑 章节</div>
+      <a href="#sec-1" class="toc-link"><span class="toc-icon">🏢</span><span class="toc-text">公司速览</span></a><a href="#sec-2" class="toc-link"><span class="toc-icon">👥</span><span class="toc-text">组织与股权</span></a><a href="#sec-3" class="toc-link"><span class="toc-icon">📰</span><span class="toc-text">近期动态(近 6 个月)</span></a><a href="#sec-4" class="toc-link"><span class="toc-icon">⚡</span><span class="toc-text">拜访要点 3 条</span></a><a href="#sec-5" class="toc-link"><span class="toc-icon">📚</span><span class="toc-text">数据来源 + 检索备注</span></a>
+    </section>
+    <section class="sidebar-block sidebar-nav">
+      <div class="sidebar-label">📂 客户导航</div>
+      <div class="nav-group-label">🚗 汽车 Tier 1</div><ul class="nav-list"><li><a class="nav-link" href="/customer-pre-briefs/%E8%81%94%E5%90%88%E6%B1%BD%E8%BD%A6%E7%94%B5%E5%AD%90/2026-08-10.html"><span class="nav-emoji">🚗</span><span class="nav-name">联合汽车电子</span><span class="nav-date">2026-08-10</span></a></li></ul><div class="nav-group-label">🏢 其他客户</div><ul class="nav-list"><li><a class="nav-link active" aria-current="page" href="/customer-pre-briefs/%E4%B8%96%E7%BA%AA%E5%8D%8E%E9%80%9A/2026-09-28.html"><span class="nav-emoji">🏢</span><span class="nav-name">世纪华通</span><span class="nav-date">2026-09-28</span></a></li></ul>
+    </section>
+    <section class="sidebar-block sidebar-back">
+      <a class="sidebar-back-link" href="https://binbinao.github.io/customer-pre-briefs/">🔙 返回主页</a>
+    </section>
+  </div>
+</aside>
+
+<nav class="toc-rail" aria-label="目录">
+  <div class="toc-rail-inner">
+    <div class="toc-label">目录</div>
+    <a href="#sec-1" class="toc-link"><span class="toc-icon">🏢</span><span class="toc-text">公司速览</span></a><a href="#sec-2" class="toc-link"><span class="toc-icon">👥</span><span class="toc-text">组织与股权</span></a><a href="#sec-3" class="toc-link"><span class="toc-icon">📰</span><span class="toc-text">近期动态(近 6 个月)</span></a><a href="#sec-4" class="toc-link"><span class="toc-icon">⚡</span><span class="toc-text">拜访要点 3 条</span></a><a href="#sec-5" class="toc-link"><span class="toc-icon">📚</span><span class="toc-text">数据来源 + 检索备注</span></a>
+  </div>
+</nav>
+
+<main class="brief-body">
+<nav class="sec-tabs" role="tablist" aria-label="章节导航"><button type="button" id="tab-sec-1" class="sec-tab active" role="tab" data-target="sec-1" aria-selected="true" aria-controls="sec-1 tabpanel-sec-1"><span class="sec-tab-icon">🏢</span><span class="sec-tab-label">公司速览</span></button><button type="button" id="tab-sec-2" class="sec-tab" role="tab" data-target="sec-2" aria-selected="false" aria-controls="sec-2 tabpanel-sec-2"><span class="sec-tab-icon">👥</span><span class="sec-tab-label">组织与股权</span></button><button type="button" id="tab-sec-3" class="sec-tab" role="tab" data-target="sec-3" aria-selected="false" aria-controls="sec-3 tabpanel-sec-3"><span class="sec-tab-icon">📰</span><span class="sec-tab-label">近期动态(近 6 个月)</span></button><button type="button" id="tab-sec-4" class="sec-tab" role="tab" data-target="sec-4" aria-selected="false" aria-controls="sec-4 tabpanel-sec-4"><span class="sec-tab-icon">⚡</span><span class="sec-tab-label">拜访要点 3 条</span></button><button type="button" id="tab-sec-5" class="sec-tab" role="tab" data-target="sec-5" aria-selected="false" aria-controls="sec-5 tabpanel-sec-5"><span class="sec-tab-icon">📚</span><span class="sec-tab-label">数据来源 + 检索备注</span></button></nav>
+<section id="sec-1" role="tabpanel" aria-labelledby="tab-sec-1" class="brief-section sec-sky" data-sec="1"><header class="sec-head"><span class="sec-icon">🏢</span><span class="sec-num">§1</span><h2 class="sec-title">1. 公司速览</h2><span class="sec-tag">公司速览</span></header><div class="sec-body"><div class="dim-grid"><div class="dim-card" tabindex="0"><div class="dim-key">主营业务</div><div class="dim-val">三大板块：①互联网游戏（占绝对主体，2026H1 游戏收入 213.42 亿元、占总营收 96.5%，移动游戏占游戏收入 91.28%）；②人工智能云数据（上海数据中心=深度参与的腾讯长三角 AI 先进计算中心，累计交付上万个机柜；深圳数据中心一期投运、二期土建接近完成）；③汽车零部件（原起家主业，稳定但占比小）</div><div class="dim-src">半年报全文 [2]、公司官网 [10]</div></div><div class="dim-card" tabindex="0"><div class="dim-key">商业模式</div><div class="dim-val">F2P 长线运营 + 数据驱动买量投放（2025 年销售费用 145.12 亿元、+87.44%，&quot;买量是放大器而非发动机&quot;）；海外自研自发（Century Games）+ 国内 IP 端手并进（盛趣）；小游戏与 App 双端互通（《无尽冬日》）；数据中心对腾讯等大客户收取算力服务费</div><div class="dim-src">半年报 [2]、21世纪经济报道 [4]</div></div><div class="dim-card" tabindex="0"><div class="dim-key">主要客户</div><div class="dim-val">游戏玩家（海外为主：2025 年外销 222.19 亿元、占比 58.63%，北美/日韩为核心市场）；算力服务大客户为腾讯系（腾讯长三角 AI 计算中心）；汽车零部件客户为整车厂 🚫 具体名单未在公开渠道核实</div><div class="dim-src">2025 年报 [3]、NBD [7]</div></div><div class="dim-card" tabindex="0"><div class="dim-key">行业地位</div><div class="dim-val">A 股游戏公司营收王+利润王：2026H1 营收 221.17 亿元（第二名三七互娱 72.75 亿的 3 倍+）、归母净利 45.03 亿元（第二名巨人网络 21.44 亿的 2.1 倍）；Century Games 蝉联全球手游发行商收入榜亚军（Sensor Tower）、中国手游发行商收入榜第 2（曾单月超网易）；A 股唯一市值超千亿元的游戏公司</div><div class="dim-src">搜狐时间线 [1]、财联社 [5]、新华财经 [6]</div></div></div></div></section><section id="sec-2" role="tabpanel" aria-labelledby="tab-sec-2" class="brief-section sec-olive inactive" data-sec="2"><header class="sec-head"><span class="sec-icon">👥</span><span class="sec-num">§2</span><h2 class="sec-title">2. 组织与股权</h2><span class="sec-tag">组织与股权</span></header><div class="sec-body"><div class="dim-grid"><div class="dim-card gov" tabindex="0"><div class="dim-key"><span class="dim-group">治理</span>创始人 / CEO</div><div class="dim-val">董事长：<strong>王佶</strong>（2014 年起执掌，现第一大股东 10.37%；&quot;全员 AI&quot;战略提出者）。上市公司法定代表人/公司负责人：<strong>谢斐</strong>。盛趣游戏 CEO：<strong>彭程</strong>；集团设 AI 发展与管理委员会（2025 年成立）</div><div class="dim-src">2025 年报 [3]、半年报 [2]、盛趣官网 [9]</div></div><div class="dim-card gov" tabindex="0"><div class="dim-key"><span class="dim-group">治理</span>关键高管</div><div class="dim-val">王佶（世纪华通+盛趣 双董事长）、谢斐（法定代表人）、彭程（盛趣 CEO）、黄怡（董秘）、钱昊（主管会计工作负责人）；点点互动/Century Games 海外负责人 🚫 未在公开渠道获得现任姓名</div><div class="dim-src">半年报 [2]、年报 [3]</div></div><div class="dim-card" tabindex="0"><div class="dim-key"><span class="dim-group">组织</span>总部</div><div class="dim-val">注册地：浙江绍兴上虞区；办公地：上海市浦东新区博云路 22 号。<strong>2026 年 7 月底世纪华通及盛趣游戏整体乔迁上海新总部（张江新地标）</strong></div><div class="dim-src">半年报 [2]、新浪 [8]</div></div><div class="dim-card" tabindex="0"><div class="dim-key"><span class="dim-group">组织</span>员工规模</div><div class="dim-val">2025 年报在职员工合计 <strong>6,016 人</strong>（母公司 0 人、全部在主要子公司），其中研发人员 2,630 人（占 43.72%，同比 +19.55%）</div><div class="dim-src">2025 年报 [3]</div></div><div class="dim-card cap" tabindex="0"><div class="dim-key"><span class="dim-group">资本</span>股权结构</div><div class="dim-val"><strong>无实际控制人</strong>（2026 年 3 月股转后）。总股本 73.71 亿股。第一大股东阵营：王佶+一致行动人（吉运盛 1.95% + 吉虞梵 1.70%）合计 <strong>14.01%</strong>（2026-08 减持 0.71% 后）；<strong>林芝腾讯 10.11%</strong>（第二大股东）；王苗通/华通控股约 8.63%（2026-04 转让 5% 后）；香港中央结算（北向）2026Q1 增至 7.69%</div><div class="dim-src">权益变动公告 [7]、2025 年报摘要 [3]、新华财经 [6]</div></div><div class="dim-card cap" tabindex="0"><div class="dim-key"><span class="dim-group">资本</span>主要股东</div><div class="dim-val">王佶（10.37%）、林芝腾讯科技有限公司（10.11%，腾讯系一致行动人集群）、香港中央结算（7.69%（估算），境外资金集合）、上海吉运盛（1.95%）、上海吉虞梵（1.70%）；2026 拟推员工持股计划 ≤2,752.83 万股（占 0.37%）、资金上限 1.91 亿元</div><div class="dim-src">2026 半年报摘要 [2]、权益公告 [7]</div></div></div><div class="quote-banner q-clay"><span class="q-icon">⚡</span><div class="q-body">⚡ <strong>资本结构关键点</strong>：王佶 2026 年 3-4 月受让王苗通/华通控股 5% 股份（对价约 27.95 亿元）的资金来自<strong>腾讯大地通途借款（年化 8% 复利、3 年期）</strong>，林芝腾讯同步增持至 10.11%——双方均声明不构成一致行动；腾讯与公司的合作方向公开表述为：游戏、渠道、买量、流量、腾讯云、投资、IDC。王佶个人持股 10.37% 与林芝腾讯 10.11% 仅差 0.26pct，治理格局为&quot;双强并立、无实控人&quot;。</div></div></div></section><section id="sec-3" role="tabpanel" aria-labelledby="tab-sec-3" class="brief-section sec-rust inactive" data-sec="3"><header class="sec-head"><span class="sec-icon">📰</span><span class="sec-num">§3</span><h2 class="sec-title">3. 近期动态(近 6 个月)</h2><span class="sec-tag">近期动态</span></header><div class="sec-body"><div class="timeline"><div class="tl-item" tabindex="0"><div class="tl-date">2026-03</div><div class="tl-cat cat-gray500">资本</div><div class="tl-event">林芝腾讯、王佶各耗资近 28 亿元增持；王佶向腾讯借款 27.95 亿元（8% 复利/3 年）受让华通控股及王苗通 5% 股份，公司变更为<strong>无实际控制人</strong></div><div class="tl-src">NBD/财联社 [7]</div></div><div class="tl-item" tabindex="0"><div class="tl-date">2026-04-29</div><div class="tl-cat cat-gray500">财报</div><div class="tl-event">2025 年报+2026 一季报：2025 营收 378.98 亿（+67.55%）、归母净利 56.05 亿（+362.02%）；2026Q1 营收 110.1 亿（+35.19%，单季历史新高）、净利 20.27 亿；年度分红每 10 股派 0.6 元</div><div class="tl-src">公司官网/新华网 [1][3]</div></div><div class="tl-item" tabindex="0"><div class="tl-date">2026-05-08</div><div class="tl-cat cat-gray500">资本</div><div class="tl-event">王佶及吉运盛拟减持 ≤3%（约 35 亿元，用于偿债），股价创年内新低；同月北向资金被披露一季度大幅加仓（+3.31 亿股至 7.69%）</div><div class="tl-src">新华财经 [6]</div></div><div class="tl-item" tabindex="0"><div class="tl-date">2026-06</div><div class="tl-cat cat-clay">产品</div><div class="tl-event">《Whiteout Survival》6 月登顶<strong>全球手游收入榜冠军</strong>（Sensor Tower，超《Royal Match》《王者荣耀》）</div><div class="tl-src">新浪财经 [4]</div></div><div class="tl-item" tabindex="0"><div class="tl-date">2026-06-29</div><div class="tl-cat cat-gray500">资本</div><div class="tl-event">吉运盛实际仅减持 0.71%（5,259.61 万股、均价 13.56 元），8 月 13 日公告<strong>提前终止减持计划</strong></div><div class="tl-src">权益公告 [7]</div></div><div class="tl-item" tabindex="0"><div class="tl-date">2026-07</div><div class="tl-cat cat-sky">合作</div><div class="tl-event">盛趣游戏与韩国 NC 在上海举办&quot;翼启&quot;发布会、签订合作备忘录：共同推动次世代 MMORPG <strong>《AION2 永恒之塔2》</strong>在中国大陆上线</div><div class="tl-src">半年报 [2]</div></div><div class="tl-item" tabindex="0"><div class="tl-date">2026-07-27</div><div class="tl-cat cat-gray500">组织</div><div class="tl-event">完成工商变更（注册资本减 8.19 亿至 73.71 亿，回购注销）；世纪华通+盛趣游戏于 7 月底<strong>乔迁上海新总部（张江）</strong></div><div class="tl-src">新浪个股资讯 [8]</div></div><div class="tl-item" tabindex="0"><div class="tl-date">2026-08-27</div><div class="tl-cat cat-gray500">财报</div><div class="tl-event">2026 半年报：营收 221.17 亿（+28.53%）、净利 45.03 亿（+69.51%）、连续 13 个季度营收增长；<strong>上市以来首次中期分红</strong>每 10 股 0.8 元（约 5.87 亿）；拟推 2026 员工持股计划</div><div class="tl-src">半年报摘要 [2]、搜狐时间线 [1]</div></div><div class="tl-item" tabindex="0"><div class="tl-date">2026-08</div><div class="tl-cat cat-clay">产品/AI</div><div class="tl-event">《冒险岛》怀旧服上线（多组服务器爆满）；第二届&quot;数龙杯&quot;全球 AI 创新大赛落幕（走进澳门）；盛趣自研 AI 编码平台&quot;易码&quot;投用</div><div class="tl-src">半年报 [2]</div></div><div class="tl-item" tabindex="0"><div class="tl-date">2026-09</div><div class="tl-cat cat-clay">产品</div><div class="tl-event">Sensor Tower 8 月出海榜：WoS、Kingshot、Tasty Travels 三款产品再聚收入榜 TOP5</div><div class="tl-src">财经涂鸦/搜狐 [5]</div></div><div class="tl-item" tabindex="0"><div class="tl-date">持续</div><div class="tl-cat cat-rust">合规</div><div class="tl-event">熠趣盛、曜瞿如业绩承诺补偿未履行，二者所持股份已全部被法院冻结（执行中）；2025-11-12 已撤销&quot;ST 华通&quot;其他风险警示</div><div class="tl-src">半年报摘要 [2][3]</div></div></div></div></section><section id="sec-4" role="tabpanel" aria-labelledby="tab-sec-4" class="brief-section sec-clay inactive" data-sec="4"><header class="sec-head"><span class="sec-icon">⚡</span><span class="sec-num">§4</span><h2 class="sec-title">⚡ 4. 拜访要点 3 条</h2><span class="sec-tag">拜访要点</span></header><div class="sec-body"><ol class="visit-list"><li class="visit-card"><div class="visit-num">01</div><div class="visit-body"><div class="visit-title"><strong>出海"三驾马车"是他们的骄傲，谈增长先谈矩阵而非单品</strong>：《Whiteout Survival》《Kingshot》《Tasty Travels》三款产品连续多月会师中国手游出海收入榜 TOP5，Century Games 蝉联全球手游发行商收入榜亚军；2026H1 游戏收入 213.42 亿元（移动占 91.28%）、海外为第一大引擎。切磋点：工业化研运体系+数据驱动买量（&quot;买量是放大器&quot;），以及《Kingshot》4 月首次反超《Whiteout Survival》后的双 SLG 运营策略。</div></div></li><li class="visit-card"><div class="visit-num">02</div><div class="visit-body"><div class="visit-title"><strong>"全员 AI"+算力基建是王佶亲自抓的第二曲线</strong>：董事长 2025 年提出&quot;全员 AI&quot;，AI 编码平台&quot;易码&quot;、ARTI 数字资产管理、AI 自动化测试（美术效率 +60%-80%（公司口径））已进研发全流程；对外投资无问芯穹、摩尔线程、非夕机器人、蓝箭航天等硬科技；同时手握腾讯长三角 AI 计算中心（已交付上万机柜）与深圳数据中心——对方可能主动谈 AI+游戏落地与算力合作，是天然的技术切入点。</div></div></li><li class="visit-card"><div class="visit-num">03</div><div class="visit-body"><div class="visit-title"><strong>治理结构处于敏感窗口期，报价与签约需留心决策链</strong>：公司为无实控人状态，王佶系 14.01% vs 林芝腾讯 10.11% 双强并立；5 月减持计划已提前终止（实际仅 0.71%），首次中期分红+员工持股计划传递稳定信号；总部刚乔迁上海张江（7 月底），组织处于扩张与整合期。拜访前确认对接人在&quot;上市公司总部/盛趣/点点互动&quot;哪个主体，涉及预算的承诺建议落实到具体子公司与决策人。</div></div></li></ol></div></section><section id="sec-5" role="tabpanel" aria-labelledby="tab-sec-5" class="brief-section sec-gray500 inactive" data-sec="5"><header class="sec-head"><span class="sec-icon">📚</span><span class="sec-num">§5</span><h2 class="sec-title">5. 数据来源 + 检索备注</h2><span class="sec-tag">数据来源</span></header><div class="sec-body"><h3 class="sub-head">已使用来源(11 条,独立)</h3><ul class="md-list"><li>[1] <a class="md-link" href="https://timeline.sohu.com/news/ihP60VxYOv" target="_blank" rel="noopener">世纪华通蝉联A股游戏利润王，上市以来首次开展中期分红 — 搜狐时间线(南都)<span class="md-link-domain"> · timeline.sohu.com</span></a> — 2026H1 业绩、游戏收入拆分、中期分红、A股游戏同业对比</li><li>[2] <a class="md-link" href="https://money.finance.sina.com.cn/corp/view/vCB_AllBulletinDetail.php?stockid=002602&amp;id=12563916" target="_blank" rel="noopener">2026年半年度报告全文 — 新浪财经披露页<span class="md-link-domain"> · money.finance.sina.com.cn</span></a> 与 <a class="md-link" href="https://paper.cnstock.com/html/2026-08/28/content_2261659.htm" target="_blank" rel="noopener">2026年半年度报告摘要 — 上海证券报<span class="md-link-domain"> · paper.cnstock.com</span></a> — 财务数据、分地区收入、高管/员工持股、业绩补偿冻结、AION2 合作</li><li>[3] <a class="md-link" href="https://static.cninfo.com.cn/finalpage/2026-04-30/1225261915.PDF" target="_blank" rel="noopener">2025年年度报告全文 — 巨潮资讯 PDF<span class="md-link-domain"> · static.cninfo.com.cn</span></a> 与 <a class="md-link" href="https://stock.stockstar.com/notice/SN2026043000016460.shtml" target="_blank" rel="noopener">2025年报摘要 — 证券之星<span class="md-link-domain"> · stock.stockstar.com</span></a> — 2025 全年数据、员工 6,016 人、研发 2,630 人、前十大股东、ST 摘帽时间线</li><li>[4] <a class="md-link" href="http://finance.sina.com.cn/roll/2026-07-18/doc-iniiftiw1502407.shtml" target="_blank" rel="noopener">上半年净利润几乎追平去年全年 — 21世纪经济报道(新浪)<span class="md-link-domain"> · finance.sina.com.cn</span></a> — 买量模式、WoS 6月登顶、新总部乔迁、产品矩阵</li><li>[5] <a class="md-link" href="https://m.cls.cn/detail/2373414" target="_blank" rel="noopener">4月中国手游出海成绩出炉 — 财联社<span class="md-link-domain"> · m.cls.cn</span></a> 与 <a class="md-link" href="https://www.sohu.com/a/1077205415_120285954" target="_blank" rel="noopener">三款产品位居8月收入榜TOP5 — 财经涂鸦(搜狐)<span class="md-link-domain"> · sohu.com</span></a> — Sensor Tower 榜单（Kingshot 反超 WoS）</li><li>[6] <a class="md-link" href="https://finance.sina.com.cn/jjxw/2026-05-11/doc-inhxppic1860193.shtml" target="_blank" rel="noopener">大股东减持致游戏龙头股价创年内新低 外资&quot;越跌越买&quot; — 新华财经(新浪)<span class="md-link-domain"> · finance.sina.com.cn</span></a> — 股权结构测算、北向加仓、估值与同业</li><li>[7] <a class="md-link" href="https://www.nbd.com.cn/rss/toutiao/articles/1707422.html" target="_blank" rel="noopener">王佶近28亿增持背后：钱是向腾讯借的 — 每日经济新闻<span class="md-link-domain"> · nbd.com.cn</span></a> 与 <a class="md-link" href="https://static.cninfo.com.cn/finalpage/2026-08-14/1225472626.PDF" target="_blank" rel="noopener">第一大股东及其一致行动人提前终止减持计划暨减持结果公告 — 巨潮 PDF<span class="md-link-domain"> · static.cninfo.com.cn</span></a> — 腾讯借款条款、减持实际执行 0.71%、无实控人结构</li><li>[8] <a class="md-link" href="http://vip.stock.finance.sina.com.cn/corp/view/vCB_AllNewsStock.php?Page=4&amp;symbol=sz002602" target="_blank" rel="noopener">落户张江新地标 世纪华通、盛趣游戏总部乔迁倒计时 — 新浪个股资讯页<span class="md-link-domain"> · vip.stock.finance.sina.com.cn</span></a> — 乔迁时间线、工商变更（注册资本减至 73.71 亿）</li><li>[9] <a class="md-link" href="http://shengqugames.com/m/cn/detail.html?id=383963&amp;type=18,19,6763" target="_blank" rel="noopener">盛趣游戏2026新春年会 — 盛趣官网<span class="md-link-domain"> · shengqugames.com</span></a> — 彭程 CEO 角色、2026 五大业务方向、组织文化</li><li>[10] <a class="md-link" href="https://www.sjhuatong.com/News/Info.aspx?ID=388690" target="_blank" rel="noopener">世纪华通官网新闻(2026 一季报解读) — sjhuatong.com<span class="md-link-domain"> · sjhuatong.com</span></a> 与 <a class="md-link" href="https://finance.sina.com.cn/wm/2026-05-07/doc-inhxanwy7663670.shtml" target="_blank" rel="noopener">从&quot;全员AI&quot;到&quot;数龙杯&quot; — 世纪华通(新浪)<span class="md-link-domain"> · finance.sina.com.cn</span></a> — AI 战略细节、数据中心进展、数龙杯、投资标的清单</li><li>[11] <a class="md-link" href="https://www.cls.cn/detail/731634" target="_blank" rel="noopener">王佶向腾讯借款28亿增持 三年利息超7亿 — 财联社<span class="md-link-domain"> · cls.cn</span></a> — 借款利息成本交叉验证</li></ul><h3 class="sub-head">阻塞 / 未覆盖</h3><ul class="md-list"><li>🚫 Tier 4（脉脉/LinkedIn 员工规模交叉验证）— 未登录状态无法抓取，员工数仅采用年报口径 6,016 人</li><li>🚫 汽车零部件板块客户名单 — 官网与财报均未点名整车厂客户</li><li>🚫 点点互动/Century Games 现任中国区负责人姓名 — 公开报道仅到子公司品牌层</li><li>🚫 Tier 3 第三方研报（浙商/东吴证券研报全文）— 仅获得新闻转述片段</li><li>🚫 《Kingshot》单月流水精确值 — 第三方估算口径分歧大（AppCurrents 约 $86M/月（估算，中等置信度）），未采用为公司口径</li></ul><h3 class="sub-head">信心标签</h3><ul class="md-list"><li>核心事实（业务/产品/榜单）：<strong>高</strong> — 半年报、年报、巨潮公告与主流财经媒体交叉一致</li><li>财务/估值：<strong>高</strong> — 2025 年报与 2026 半年报均为交易所披露口径；股比以 2026-08 权益公告为准</li><li>组织/人事：<strong>中</strong> — 董事长/法定代表人/盛趣 CEO 有多源确认；子公司层高管（点点互动、Century Games）公开信息不足</li></ul></div></section>
+</main>
+
+<footer class="brief-foot">
+  <p>本简报由 Hermes Agent <code>customer-pre-brief</code> skill 自动生成 · 7 天有效期 · 适合销售/BD 拜访前 5 分钟速读</p>
+  <p class="muted">Generated at 2026-09-28 · 视觉与索引站保持一致</p>
+</footer>
+
+</div>
+<noscript>
+  <style>
+    /* 无 JS 时: 隐藏顶部 tab 条, 强制所有章节显示 (退化到 v2 行为) */
+    .sec-tabs { display: none !important; }
+    .brief-section.inactive { display: block !important; }
+  </style>
+</noscript>
+<script>
+// ============= SPA 章节切换 + URL hash 路由 + 双重入口联动 =============
+(function(){
+  const sections = Array.from(document.querySelectorAll('.brief-section'));
+  const tabs = Array.from(document.querySelectorAll('.sec-tab'));
+  const tocLinks = Array.from(document.querySelectorAll('.toc-rail a, .sidebar-toc a'));
+  const firstId = sections.length ? sections[0].id : 'sec-1';
+
+  function showSection(secId){
+    secId = secId || firstId;
+    // 找不到目标时回落第一章节
+    if (!document.getElementById(secId)) secId = firstId;
+
+    // 1. 切 section 显示
+    sections.forEach(s => {
+      if (s.id === secId) {
+        s.classList.remove('inactive');
+        s.setAttribute('aria-hidden', 'false');
+      } else {
+        s.classList.add('inactive');
+        s.setAttribute('aria-hidden', 'true');
+      }
+    });
+
+    // 2. 切顶部 tab 激活态 + aria-selected
+    tabs.forEach(t => {
+      const isActive = t.dataset.target === secId;
+      t.classList.toggle('active', isActive);
+      t.setAttribute('aria-selected', isActive ? 'true' : 'false');
+      t.setAttribute('tabindex', isActive ? '0' : '-1');
+    });
+
+    // 3. 切左/右 TOC anchor 激活态 + aria-current
+    const hash = '#' + secId;
+    tocLinks.forEach(a => {
+      const isActive = a.getAttribute('href') === hash;
+      a.classList.toggle('active', isActive);
+      if (isActive) a.setAttribute('aria-current', 'location');
+      else a.removeAttribute('aria-current');
+    });
+
+    // 4. 同步 URL hash (用 replaceState 避免污染历史)
+    if (location.hash !== hash) {
+      try { history.replaceState(null, '', hash); } catch (e) { location.hash = hash; }
+    }
+
+    // 5. SPA 模式下把目标 section 滚到顶 (左侧 sidebar 旁能看到), 仅在 section 距顶部较远时
+    const target = document.getElementById(secId);
+    if (target) {
+      const rect = target.getBoundingClientRect();
+      // 只在 main 已滚动过 / 目标不在可视区内时滚动, 避免初次加载跳动
+      if (Math.abs(rect.top) > 120) {
+        target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    }
+  }
+
+  // ---- 顶部 tab 点击 ----
+  tabs.forEach(btn => {
+    btn.addEventListener('click', () => showSection(btn.dataset.target));
+  });
+
+  // ---- 左/右 sidebar TOC 点击 ----
+  tocLinks.forEach(a => {
+    a.addEventListener('click', e => {
+      const href = a.getAttribute('href') || '';
+      if (!href.startsWith('#')) return;
+      e.preventDefault();
+      const secId = href.slice(1);
+      showSection(secId);
+    });
+  });
+
+  // ---- URL hash 变化 (前进/后退 / 手动改) ----
+  window.addEventListener('hashchange', () => {
+    showSection((location.hash || '').replace('#', '') || firstId);
+  });
+
+  // ---- 键盘左右切换 (在 tab 上按 ←/→/Home/End) ----
+  tabs.forEach((tab, idx) => {
+    tab.addEventListener('keydown', e => {
+      let next = null;
+      if (e.key === 'ArrowRight') next = tabs[(idx + 1) % tabs.length];
+      else if (e.key === 'ArrowLeft') next = tabs[(idx - 1 + tabs.length) % tabs.length];
+      else if (e.key === 'Home') next = tabs[0];
+      else if (e.key === 'End') next = tabs[tabs.length - 1];
+      if (next) {
+        e.preventDefault();
+        next.focus();
+        showSection(next.dataset.target);
+      }
+    });
+  });
+
+  // ---- 初始: 读 URL hash, 否则第一章节 ----
+  const initial = (location.hash || '').replace('#', '') || firstId;
+  showSection(initial);
+})();
+</script>
+</body>
+</html>
