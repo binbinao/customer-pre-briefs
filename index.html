@@ -132,6 +132,7 @@
   .cat-item[aria-current="true"].cat-chip { background:rgba(91,139,160,.08); border-color:var(--sky); color:var(--sky); }
   .cat-item[aria-current="true"].cat-energy { background:rgba(120,140,93,.08); border-color:var(--olive); color:var(--olive); }
   .cat-item[aria-current="true"].cat-game { background:rgba(139,107,158,.08); border-color:var(--purple); color:var(--purple); }
+  .cat-item[aria-current="true"].cat-pharma { background:rgba(176,74,63,.08); border-color:var(--rust); color:var(--rust); }
   .cat-item[aria-current="true"].cat-other { background:rgba(135,134,127,.08); border-color:var(--gray-500); color:var(--gray-700); }
 
   .cat-icon {
@@ -329,6 +330,7 @@
   .cat-title.chip .icon-disc { box-shadow:0 0 0 1.5px var(--sky); }
   .cat-title.energy .icon-disc { box-shadow:0 0 0 1.5px var(--olive); }
   .cat-title.game .icon-disc { box-shadow:0 0 0 1.5px var(--purple); }
+  .cat-title.pharma .icon-disc { box-shadow:0 0 0 1.5px var(--rust); }
   .cat-title.other .icon-disc { box-shadow:0 0 0 1.5px var(--gray-500); }
   .cat-title .meta {
     margin-left:auto;
@@ -500,6 +502,9 @@
           <li><a href="#game" class="cat-item cat-game" data-cat="game" role="tab" aria-selected="false" tabindex="-1">
             <span class="cat-icon">🎮</span><span class="cat-name">游戏 / 文娱</span><span class="cat-count" data-count-for="game">—</span>
           </a></li>
+          <li><a href="#pharma" class="cat-item cat-pharma" data-cat="pharma" role="tab" aria-selected="false" tabindex="-1">
+            <span class="cat-icon">🧬</span><span class="cat-name">医健 / 制药</span><span class="cat-count" data-count-for="pharma">—</span>
+          </a></li>
           <li><a href="#other" class="cat-item cat-other" data-cat="other" role="tab" aria-selected="false" tabindex="-1">
             <span class="cat-icon">🏢</span><span class="cat-name">其他</span><span class="cat-count" data-count-for="other">—</span>
           </a></li>
@@ -571,6 +576,7 @@
     <a href="#chip">🔌 芯片/半导体</a>
     <a href="#energy">⚡ 能源/电池</a>
     <a href="#game">🎮 游戏/文娱</a>
+    <a href="#pharma">🧬 医健/制药</a>
     <a href="#other">🏢 其他</a>
   </nav>
 
@@ -668,6 +674,37 @@
     </div>
   </section>
 
+  <!-- ====== 医健/制药 ====== -->
+  <section id="pharma" class="cat-section" data-briefs-count="1" data-clients-count="1" aria-labelledby="pharma-title">
+    <div class="cat-title pharma">
+      <span class="icon-disc">🧬</span>
+      <h2 id="pharma-title">医健 / 制药</h2>
+      <span class="count">1 篇</span>
+      <span class="meta">active</span>
+    </div>
+    <div class="report-list">
+      <div class="report">
+        <span class="icon">🧬</span>
+        <div class="info">
+          <a class="title" href="罗氏/2026-09-28.html">罗氏 Roche (Roche Holding AG) — 拜访前 AI 尽调简报</a>
+          <a class="md-fallback" href="罗氏/2026-09-28.md">[MD]</a>
+          <div class="meta-row">
+            <span class="tier-row">
+              <span class="tier-tag t1">Tier 1</span>
+              <span class="tier-tag t2">Tier 2</span>
+              <span class="tier-tag t7">Tier 7</span>
+              <span class="tier-tag cad">罗氏官网 / 年报财报 / 21财经 / CIO.com</span>
+            </span>
+            <span class="expiry"><span class="dot"></span>7 天内有效</span>
+          </div>
+          <div class="desc">集团 615 亿瑞郎 + 中国近 5,000 人 · 张江全产业链 + 苏州诊断基地 · CDTO Mamilli AI 工厂/Galileo + 边欣数字化主张 · 阿里健康×飞猪/高德出行锚点 · 家族池 64.97% 超级投票权。</div>
+        </div>
+        <span class="date">2026-09-28</span>
+        <span class="open-arrow">→</span>
+      </div>
+    </div>
+  </section>
+
   <!-- ====== 其他 ====== -->
   <section id="other" class="cat-section" data-briefs-count="0" aria-labelledby="other-title">
     <div class="cat-title other">
@@ -685,7 +722,7 @@
   </section>
 
   <footer>
-    📦 自动生成于 2026-09-28 · 由 <code>/prebrief</code> 触发 · GitHub Pages 自动部署
+    📦 自动生成于 2026-09-28（含 罗氏） · 由 <code>/prebrief</code> 触发 · GitHub Pages 自动部署
   </footer>
 
   </main>
@@ -694,7 +731,7 @@
 <script>
 // ====== SPA 行业切换: hash 驱动 + a11y (aria-current + reduced-motion) ======
 (function() {
-  const VALID = ['auto', 'chip', 'energy', 'game', 'other'];
+  const VALID = ['auto', 'chip', 'energy', 'game', 'pharma', 'other'];
   const DEFAULT = 'auto';
 
   function activate(cat) {

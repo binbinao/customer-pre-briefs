@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>罗氏 Roche 拜访前 AI 尽调简报 · 客户尽调简报</title>
+<style>
+  :root {
+    --bg: #F8F7F4; --card: #FFFFFF; --text: #141413;
+    --clay: #D97757; --olive: #788C5D; --rust: #B04A3F;
+    --sky: #5B8BA0; --purple: #8B6B9E;
+    --gray-100: #EEECE6; --gray-300: #D1CFC5;
+    --gray-500: #87867F; --gray-700: #3D3D3A;
+    --border: 1.5px solid var(--gray-300);
+    --radius: 12px;
+    --r-sm: 8px;     /* dim-card / tl-item / quote-banner */
+    --r-md: 14px;    /* visit-card / sec-body li 重点卡 */
+    --r-lg: 18px;    /* visit-card 当前已 14, 保留 */
+    --r-pill: 999px; /* meta-item / btn */
+    --ease: cubic-bezier(0.16, 1, 0.3, 1);
+    --dur-fast: 150ms;
+    --dur-base: 250ms;
+  }
+
+  /* ===== a11y: 全局 :focus-visible 描边 (skill 强制要求) ===== */
+  *:focus-visible {
+    outline: 2px solid var(--clay);
+    outline-offset: 2px;
+  }
+  /* 不改 border-radius (skill 警告:会破坏 pill 几何) */
+  a:focus-visible, button:focus-visible, .toc-link:focus-visible, .btn:focus-visible {
+    outline-offset: 3px;
+  }
+
+  /* ===== a11y: 前庭敏感用户关闭所有过渡 ===== */
+  @media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  html { scroll-behavior: smooth; }
+  body { background:var(--bg); color:var(--text); font-family:system-ui,-apple-system,"Microsoft YaHei",sans-serif;
+         font-size:15px; line-height:1.65; padding:32px 20px 80px; }
+  .page { max-width:980px; margin:0 auto; position:relative; }
+
+  /* header */
+  .brief-header { text-align:center; margin-bottom:32px; padding-bottom:24px; border-bottom:var(--border); }
+  .brief-kicker { font-size:12px; letter-spacing:.18em; color:var(--gray-500); text-transform:uppercase; margin-bottom:8px; }
+  .brief-title { font-size:30px; font-weight:600; color:var(--text); margin-bottom:14px; line-height:1.3; }
+  .brief-meta { display:flex; flex-wrap:wrap; gap:10px 18px; justify-content:center; margin-bottom:18px; }
+  .meta-item { display:inline-flex; align-items:center; gap:6px; padding:6px 12px; background:var(--card); border:var(--border); border-radius:20px; font-size:13px; }
+  .meta-icon { font-size:13px; }
+  .meta-key { color:var(--gray-500); font-size:12px; }
+  .meta-val { color:var(--text); font-weight:500; }
+  .brief-actions { display:flex; gap:8px; justify-content:center; flex-wrap:wrap; }
+  .btn { display:inline-block; padding:6px 14px; border-radius:18px; font-size:13px; text-decoration:none; transition:all .2s; }
+  .btn-ghost { background:var(--card); border:var(--border); color:var(--gray-700); }
+  .btn-ghost:hover { border-color:var(--clay); color:var(--clay); background:var(--gray-100); }
+
+  /* TOC rail */
+  .toc-rail { position:sticky; top:24px; float:right; width:200px; margin:0 0 24px 24px; z-index:5; }
+  .toc-rail-inner { background:var(--card); border:var(--border); border-radius:var(--radius); padding:14px 12px; }
+  .toc-label { font-size:11px; color:var(--gray-500); text-transform:uppercase; letter-spacing:.15em; margin-bottom:10px; padding-left:4px; }
+  .toc-link { display:flex; align-items:center; gap:8px; padding:7px 8px; border-radius:8px; font-size:13px; color:var(--gray-700); text-decoration:none; transition:all .15s; }
+  .toc-link:hover { background:var(--gray-100); color:var(--text); }
+  .toc-link.active { background:rgba(217,119,87,.1); color:var(--clay); font-weight:600; }
+  .toc-icon { flex-shrink:0; font-size:14px; }
+  .toc-text { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+
+  /* main */
+  .brief-body { max-width:740px; }
+
+  /* sections */
+  .brief-section { background:var(--card); border:var(--border); border-radius:var(--radius);
+                    padding:22px 26px; margin-bottom:24px; position:relative; overflow:hidden; }
+  /* SPA 隐藏非激活章节 (无 JS 走 <noscript> 强制恢复) */
+  .brief-section.inactive { display:none; }
+  .brief-section::before { content:""; position:absolute; top:0; left:0; width:4px; height:100%; background:var(--section-color, var(--gray-300)); }
+
+  /* 顶部 tab 条 — SPA 双重入口 */
+  .sec-tabs {
+    display:flex; gap:8px; align-items:center;
+    background:var(--card); border:var(--border); border-radius:var(--radius);
+    padding:6px; margin:0 0 18px;
+    overflow-x:auto; -webkit-overflow-scrolling:touch;
+    scroll-snap-type:x proximity; scrollbar-width:thin;
+  }
+  .sec-tabs::-webkit-scrollbar { height:4px; }
+  .sec-tabs::-webkit-scrollbar-thumb { background:var(--gray-300); border-radius:2px; }
+  .sec-tab {
+    flex:0 0 auto; min-width:max-content; max-width:220px;
+    display:inline-flex; align-items:center; gap:6px;
+    padding:8px 12px; border-radius:var(--r-pill);
+    background:transparent; border:0; cursor:pointer;
+    color:var(--gray-700); font:inherit; font-size:13px; font-weight:500;
+    scroll-snap-align:start;
+    transition: background var(--dur-fast) var(--ease), color var(--dur-fast) var(--ease), transform var(--dur-fast) var(--ease), box-shadow var(--dur-fast) var(--ease);
+  }
+  .sec-tab:hover { background:rgba(217,119,87,.10); color:var(--clay); }
+  .sec-tab:focus-visible { outline:2px solid var(--clay); outline-offset:2px; }
+  .sec-tab-icon { font-size:14px; line-height:1; }
+  .sec-tab-label { white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .sec-tab.active {
+    background:var(--clay); color:var(--card); font-weight:600;
+    transform:translateY(-1px);
+    box-shadow:0 4px 12px rgba(217,119,87,.32), inset 0 1px 0 rgba(255,255,255,.15);
+  }
+  .sec-sky { --section-color: var(--sky); }
+  .sec-olive { --section-color: var(--olive); }
+  .sec-rust { --section-color: var(--rust); }
+  .sec-clay { --section-color: var(--clay); }
+  .sec-gray500 { --section-color: var(--gray-500); }
+
+  .sec-head { display:flex; align-items:center; gap:10px; margin-bottom:16px; padding-bottom:12px; border-bottom:1px dashed var(--gray-300); }
+  .sec-icon { font-size:22px; flex-shrink:0; }
+  .sec-num { font-size:11px; color:var(--gray-500); font-family:monospace; letter-spacing:.1em; padding:3px 7px; background:var(--gray-100); border-radius:4px; }
+  .sec-title { font-size:20px; font-weight:600; color:var(--text); flex:1; }
+  .sec-tag { font-size:11px; color:var(--gray-500); padding:3px 8px; border:1px solid var(--gray-300); border-radius:10px; }
+  .sec-body { color:var(--text); }
+
+  .sub-head { font-size:16px; font-weight:600; color:var(--text); margin:18px 0 10px; padding-left:10px; border-left:3px solid var(--sky); }
+  .micro-head { font-size:14px; font-weight:600; color:var(--gray-700); margin:14px 0 6px; }
+
+  /* paragraphs */
+  .md-p { margin-bottom:10px; color:var(--gray-700); }
+  .md-p strong, .tl-event strong, .visit-text strong, .dim-val strong { color:var(--text); font-weight:600; }
+
+  /* md links */
+  .md-link { color:var(--sky); text-decoration:none; border-bottom:1px solid rgba(91,139,160,.3); transition:all .15s; }
+  .md-link:hover { color:var(--clay); border-bottom-color:var(--clay); }
+  .md-link-domain { font-size:11px; color:var(--gray-500); margin-left:2px; }
+
+  /* lists */
+  .md-list { padding-left:20px; margin:8px 0; color:var(--gray-700); }
+  .md-list li { margin-bottom:4px; }
+  .md-list.num { padding-left:24px; }
+
+  /* blockquote banners */
+  .quote-banner { display:flex; gap:12px; align-items:flex-start; padding:12px 16px; border-radius:10px;
+                   margin:12px 0; font-size:14px; line-height:1.6; border:1.5px solid; }
+  .quote-banner .q-icon { font-size:18px; flex-shrink:0; line-height:1.6; }
+  .quote-banner .q-body { flex:1; }
+  .q-sky { background:rgba(91,139,160,.08); border-color:rgba(91,139,160,.4); color:var(--text); }
+  .q-olive { background:rgba(120,140,93,.08); border-color:rgba(120,140,93,.4); color:var(--text); }
+  .q-clay { background:rgba(217,119,87,.1); border-color:rgba(217,119,87,.5); color:var(--text); font-weight:500; }
+  .q-rust { background:rgba(176,74,63,.08); border-color:rgba(176,74,63,.4); color:var(--text); }
+  .q-clay strong, .q-rust strong { color:inherit; }
+
+  /* dim grid (§1 §2) */
+  .dim-grid { display:grid; gap:10px; margin-top:8px; }
+  .dim-card { display:grid; grid-template-columns:120px 1fr 200px; gap:14px;
+               padding:14px 16px; background:var(--bg); border-radius:8px; border:1px solid var(--gray-100);
+               transition:all .15s; align-items:start; min-height:64px; }
+  .dim-card:hover, .dim-card:focus-within { border-color:var(--clay); background:var(--card); }
+  .dim-card .dim-group { display:inline-block; font-size:10px; padding:1px 6px; border-radius:3px;
+                          background:var(--gray-100); color:var(--gray-500); margin-bottom:4px; }
+  .dim-card.gov { border-left:3px solid var(--olive); }
+  .dim-card.cap { border-left:3px solid var(--purple); }
+  .dim-key { color:var(--sky); font-weight:600; font-size:13px; padding-top:2px; }
+  .dim-val { color:var(--text); font-size:14px; line-height:1.65; }
+  .dim-val strong { color:var(--clay); }
+  .dim-src { color:var(--gray-500); font-size:11px; padding-top:4px; font-family:monospace;
+              word-break:break-all; }
+
+  /* timeline (§3) */
+  .timeline { position:relative; padding-left:8px; margin-top:6px; }
+  .timeline::before { content:""; position:absolute; left:80px; top:8px; bottom:8px; width:2px; background:var(--gray-300); }
+  .tl-item { display:grid; grid-template-columns:74px 110px 1fr; gap:14px;
+              padding:10px 12px; margin-bottom:8px; border-radius:8px; transition:all .15s;
+              align-items:start; position:relative; }
+  .tl-item:hover { background:var(--bg); }
+  .tl-item::before { content:""; position:absolute; left:78px; top:16px; width:8px; height:8px; border-radius:50%; background:var(--clay); border:2px solid var(--card); }
+  .tl-date { font-family:monospace; color:var(--sky); font-weight:600; font-size:13px; padding-top:1px; }
+  .tl-cat { font-size:11px; padding:3px 8px; border-radius:10px; display:inline-block; text-align:center; font-weight:500; }
+  .cat-rust { background:rgba(176,74,63,.12); color:var(--rust); }
+  .cat-clay { background:rgba(217,119,87,.12); color:var(--clay); }
+  .cat-olive { background:rgba(120,140,93,.12); color:var(--olive); }
+  .cat-sky { background:rgba(91,139,160,.12); color:var(--sky); }
+  .cat-purple { background:rgba(139,107,158,.12); color:var(--purple); }
+  .cat-gray500 { background:var(--gray-100); color:var(--gray-500); }
+  .tl-event { color:var(--text); font-size:14px; line-height:1.6; }
+  .tl-event strong { color:var(--clay); }
+  .tl-src { grid-column:1/-1; padding-left:200px; color:var(--gray-500); font-size:11px; font-family:monospace; }
+
+  /* visit list (§4) */
+  .visit-list { list-style:none; padding:0; margin:0; counter-reset:visit; }
+  .visit-card { display:grid; grid-template-columns:60px 1fr; gap:14px; padding:16px 18px;
+                 margin-bottom:12px; border-radius:14px;
+                 background:linear-gradient(135deg, rgba(217,119,87,.14), rgba(217,119,87,.04));
+                 border:2px solid rgba(217,119,87,.45);
+                 box-shadow:0 4px 14px rgba(217,119,87,.08);
+                 position:relative; transition:transform var(--dur-fast) var(--ease), box-shadow var(--dur-fast) var(--ease); }
+  .visit-card:hover, .visit-card:focus-within { border-color:var(--clay); box-shadow:0 8px 22px rgba(217,119,87,.18); transform:translateY(-1px); }
+  .visit-num { font-family:"Georgia",serif; font-size:42px; font-weight:700; color:var(--clay); line-height:1; padding-top:2px; letter-spacing:-.02em; }
+  .visit-body { color:var(--text); }
+  .visit-title { font-weight:600; font-size:15px; color:var(--text); margin-bottom:6px; }
+  .visit-text { font-size:13.5px; color:var(--gray-700); line-height:1.7; }
+  .visit-text strong { color:var(--clay); }
+  .visit-sub { font-size:13px; color:var(--gray-700); line-height:1.7; margin-top:6px; padding-left:10px; border-left:2px solid rgba(217,119,87,.3); }
+  .visit-sub strong { color:var(--clay); }
+  .visit-sub::before { content:"· "; color:var(--clay); font-weight:bold; margin-right:4px; }
+
+  /* raw table fallback */
+  .raw-table-wrap { overflow-x:auto; margin:10px 0; }
+  .raw-table { width:100%; border-collapse:collapse; font-size:13px; }
+  .raw-table th, .raw-table td { padding:8px 10px; border:1px solid var(--gray-300); text-align:left; }
+  .raw-table th { background:var(--gray-100); font-weight:600; }
+
+  /* source link styles (§5) */
+  .sec-body ul.md-list { list-style:none; padding:0; }
+  .sec-body ul.md-list li { padding:10px 14px; margin-bottom:8px; background:var(--bg); border-radius:8px; border:1px solid var(--gray-100); }
+  .sec-body ul.md-list li:hover { border-color:var(--sky); }
+  /* 来源区文字提亮到 gray-700 (4.5:1 AA 通过,原 gray-500 只有 3.0:1) */
+  .sec-body ul.md-list li, .sec-body ul.md-list li * { color:var(--gray-700); }
+  .sec-body .md-link { color:var(--sky); }
+
+  /* footer */
+  .brief-foot { text-align:center; margin-top:40px; padding-top:24px; border-top:var(--border); color:var(--gray-500); font-size:13px; }
+  .brief-foot .muted { margin-top:6px; font-size:11px; }
+  .brief-foot code { background:var(--gray-100); padding:1px 6px; border-radius:4px; font-size:12px; color:var(--gray-700); }
+
+  /* responsive */
+  /* 中等屏幕: dim-card 中间档 */
+  @media (max-width:980px) {
+    .dim-card { grid-template-columns:100px 1fr 160px; }
+    .toc-rail { width:min(200px, 22vw); }
+  }
+
+  /* ===========================
+   * 桌面 ≥1024px: 左右两栏布局
+   * =========================== */
+  @media (min-width:1024px) {
+    .page { max-width:1180px; display:grid; grid-template-columns:320px 1fr; column-gap:40px; row-gap:0; align-items:start; padding-top:8px; }
+    .brief-header { grid-column:1/-1; }
+    .brief-body { grid-column:2; max-width:760px; min-width:0; }
+
+    /* 桌面隐藏右侧浮动 TOC (章节搬到左侧 sidebar) */
+    .toc-rail { display:none; }
+
+    /* 桌面: 顶部 tab 条 sticky 在 main 头部, 跟随滚动, 章节切换更稳 */
+    .sec-tabs {
+      position:sticky; top:0; z-index:10;
+      margin:0 0 18px;
+      background:rgba(248,247,244,.92);
+      backdrop-filter:saturate(180%) blur(10px);
+      -webkit-backdrop-filter:saturate(180%) blur(10px);
+      box-shadow:0 1px 0 var(--gray-300);
+    }
+
+    /* sidebar 在桌面独占左列 */
+    .sidebar {
+      grid-column:1;
+      position:sticky;
+      top:24px;
+      align-self:start;
+      max-height:calc(100vh - 48px);
+      overflow-y:auto;
+      padding-right:4px;
+      margin-bottom:32px;
+    }
+    .sidebar-inner {
+      display:flex;
+      flex-direction:column;
+      gap:18px;
+    }
+    .sidebar-block {
+      background:var(--card);
+      border:var(--border);
+      border-radius:var(--radius);
+      padding:14px 14px;
+    }
+    .sidebar-label {
+      font-size:11px;
+      color:var(--gray-500);
+      text-transform:uppercase;
+      letter-spacing:.15em;
+      margin-bottom:10px;
+      padding:0 4px;
+      font-weight:600;
+    }
+
+    /* 章节 toc-link (复用现有样式, 在 sidebar 内显示) */
+    .sidebar-toc .toc-link { display:flex; }
+
+    /* 客户导航 */
+    .sidebar-nav .nav-group-label {
+      font-size:11px;
+      color:var(--gray-700);
+      font-weight:600;
+      letter-spacing:.04em;
+      padding:6px 6px 4px;
+      margin-top:4px;
+    }
+    .sidebar-nav .nav-list { list-style:none; padding:0; margin:0 0 4px; }
+    .sidebar-nav .nav-list li { margin:0; }
+    .nav-link {
+      display:grid;
+      grid-template-columns:18px 1fr auto;
+      align-items:center;
+      gap:8px;
+      padding:7px 8px;
+      border-radius:8px;
+      font-size:13px;
+      color:var(--gray-700);
+      text-decoration:none;
+      transition:all .15s;
+    }
+    .nav-link:hover { background:var(--gray-100); color:var(--text); }
+    .nav-link.active { background:rgba(217,119,87,.12); color:var(--clay); font-weight:600; }
+    .nav-link.active .nav-emoji { filter:drop-shadow(0 0 1px rgba(217,119,87,.5)); }
+    .nav-emoji { font-size:14px; }
+    .nav-name { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+    .nav-date { font-family:monospace; font-size:11px; color:var(--gray-500); }
+
+    /* 返回主页块 */
+    .sidebar-back { padding:10px 12px; }
+    .sidebar-back-link {
+      display:flex; align-items:center; justify-content:center;
+      gap:6px;
+      padding:10px 14px;
+      background:var(--bg);
+      border:1.5px solid var(--gray-300);
+      border-radius:10px;
+      color:var(--gray-700);
+      font-size:13px;
+      font-weight:500;
+      text-decoration:none;
+      transition:all .15s;
+    }
+    .sidebar-back-link:hover { border-color:var(--clay); color:var(--clay); background:var(--gray-100); }
+
+    /* footer 跨两列 */
+    .brief-foot { grid-column:1/-1; }
+  }
+
+  /* 移动端: 顶部 tab 横滑 + 隐藏旧底部 tab bar (改由顶部 tab 承担) */
+  @media (max-width:820px) {
+    /* 桌面 sidebar 在移动端隐藏 */
+    .sidebar { display:none; }
+
+    /* 顶部 tab 条: 横滑 + scroll-snap, 替代旧底部 tab bar */
+    .sec-tabs {
+      position:sticky; top:0; z-index:20;
+      margin:0 -14px 16px;  /* 顶到屏幕边缘, 更横滑可见 */
+      padding:6px 14px;
+      background:rgba(248,247,244,.95);
+      backdrop-filter:saturate(180%) blur(10px);
+      -webkit-backdrop-filter:saturate(180%) blur(10px);
+      box-shadow:0 1px 0 var(--gray-300);
+      border-radius:0;
+      border-left:0; border-right:0;
+      overflow-x:auto; overflow-y:hidden;
+      scroll-snap-type:x mandatory;
+      -webkit-overflow-scrolling:touch;
+    }
+    .sec-tab { scroll-snap-align:start; }
+    .sec-tab-icon { font-size:15px; }
+
+    /* 旧移动底部 tab bar 不再需要 (顶部 tab 已统一入口) */
+    .toc-rail { display:none; }
+    body { padding-bottom:32px; }
+    .dim-card { grid-template-columns:1fr; }
+    .dim-key { padding-top:0; }
+    .dim-src { grid-column:auto; padding-top:0; }
+    .timeline::before { left:14px; }
+    .tl-item { grid-template-columns:1fr; gap:4px; }
+    .tl-item::before { display:none; }
+    .tl-src { padding-left:0; grid-column:auto; }
+  }
+  @media (max-width:600px) {
+    body { padding:20px 14px 100px; }
+    .brief-title { font-size:22px; }
+    .brief-section { padding:18px 18px; }
+    .visit-card { grid-template-columns:1fr; }
+    .visit-num { font-size:24px; }
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+<header class="brief-header">
+  <div class="brief-kicker">📋 Customer Pre-Visit Briefing</div>
+  <h1 class="brief-title">罗氏 Roche 拜访前 AI 尽调简报</h1>
+  <div class="brief-meta">
+    <div class="meta-item"><span class="meta-icon">🕐</span><span class="meta-key">生成时间</span><span class="meta-val">2026-09-28 21:22</span></div><div class="meta-item"><span class="meta-icon">🔬</span><span class="meta-key">调研档位</span><span class="meta-val">Deep (~20 min · 7 tier sources)</span></div><div class="meta-item"><span class="meta-icon">📅</span><span class="meta-key">有效期</span><span class="meta-val">7 天</span></div><div class="meta-item"><span class="meta-icon">🔁</span><span class="meta-key">上一次调研</span><span class="meta-val">无</span></div>
+  </div>
+  <div class="brief-actions">
+    <a class="btn btn-ghost" href="https://github.com/binbinao/customer-pre-briefs/tree/main/罗氏/2026-09-28.md">📝 查看 Markdown 源</a>
+    <a class="btn btn-ghost" href="https://github.com/binbinao/customer-pre-briefs/commit/main" target="_blank" rel="noopener">🔗 提交历史</a>
+    <a class="btn btn-ghost" href="/customer-pre-briefs/">← 返回简报索引</a>
+  </div>
+</header>
+
+<aside class="sidebar" aria-label="详情页导航">
+  <div class="sidebar-inner">
+    <section class="sidebar-block sidebar-toc">
+      <div class="sidebar-label">📑 章节</div>
+      <a href="#sec-1" class="toc-link"><span class="toc-icon">🏢</span><span class="toc-text">公司速览</span></a><a href="#sec-2" class="toc-link"><span class="toc-icon">👥</span><span class="toc-text">组织与股权</span></a><a href="#sec-3" class="toc-link"><span class="toc-icon">📰</span><span class="toc-text">近期动态(近 6 个月)</span></a><a href="#sec-4" class="toc-link"><span class="toc-icon">⚡</span><span class="toc-text">拜访要点 3 条</span></a><a href="#sec-5" class="toc-link"><span class="toc-icon">📚</span><span class="toc-text">数据来源 + 检索备注</span></a>
+    </section>
+    <section class="sidebar-block sidebar-nav">
+      <div class="sidebar-label">📂 客户导航</div>
+      <div class="nav-group-label">🚗 汽车 Tier 1</div><ul class="nav-list"><li><a class="nav-link" href="/customer-pre-briefs/%E8%81%94%E5%90%88%E6%B1%BD%E8%BD%A6%E7%94%B5%E5%AD%90/2026-08-10.html"><span class="nav-emoji">🚗</span><span class="nav-name">联合汽车电子</span><span class="nav-date">2026-08-10</span></a></li></ul><div class="nav-group-label">🏢 其他客户</div><ul class="nav-list"><li><a class="nav-link" href="/customer-pre-briefs/%E4%B8%96%E7%BA%AA%E5%8D%8E%E9%80%9A/2026-09-28.html"><span class="nav-emoji">🏢</span><span class="nav-name">世纪华通</span><span class="nav-date">2026-09-28</span></a></li><li><a class="nav-link active" aria-current="page" href="/customer-pre-briefs/%E7%BD%97%E6%B0%8F/2026-09-28.html"><span class="nav-emoji">🏢</span><span class="nav-name">罗氏</span><span class="nav-date">2026-09-28</span></a></li></ul>
+    </section>
+    <section class="sidebar-block sidebar-back">
+      <a class="sidebar-back-link" href="https://binbinao.github.io/customer-pre-briefs/">🔙 返回主页</a>
+    </section>
+  </div>
+</aside>
+
+<nav class="toc-rail" aria-label="目录">
+  <div class="toc-rail-inner">
+    <div class="toc-label">目录</div>
+    <a href="#sec-1" class="toc-link"><span class="toc-icon">🏢</span><span class="toc-text">公司速览</span></a><a href="#sec-2" class="toc-link"><span class="toc-icon">👥</span><span class="toc-text">组织与股权</span></a><a href="#sec-3" class="toc-link"><span class="toc-icon">📰</span><span class="toc-text">近期动态(近 6 个月)</span></a><a href="#sec-4" class="toc-link"><span class="toc-icon">⚡</span><span class="toc-text">拜访要点 3 条</span></a><a href="#sec-5" class="toc-link"><span class="toc-icon">📚</span><span class="toc-text">数据来源 + 检索备注</span></a>
+  </div>
+</nav>
+
+<main class="brief-body">
+<nav class="sec-tabs" role="tablist" aria-label="章节导航"><button type="button" id="tab-sec-1" class="sec-tab active" role="tab" data-target="sec-1" aria-selected="true" aria-controls="sec-1 tabpanel-sec-1"><span class="sec-tab-icon">🏢</span><span class="sec-tab-label">公司速览</span></button><button type="button" id="tab-sec-2" class="sec-tab" role="tab" data-target="sec-2" aria-selected="false" aria-controls="sec-2 tabpanel-sec-2"><span class="sec-tab-icon">👥</span><span class="sec-tab-label">组织与股权</span></button><button type="button" id="tab-sec-3" class="sec-tab" role="tab" data-target="sec-3" aria-selected="false" aria-controls="sec-3 tabpanel-sec-3"><span class="sec-tab-icon">📰</span><span class="sec-tab-label">近期动态(近 6 个月)</span></button><button type="button" id="tab-sec-4" class="sec-tab" role="tab" data-target="sec-4" aria-selected="false" aria-controls="sec-4 tabpanel-sec-4"><span class="sec-tab-icon">⚡</span><span class="sec-tab-label">拜访要点 3 条</span></button><button type="button" id="tab-sec-5" class="sec-tab" role="tab" data-target="sec-5" aria-selected="false" aria-controls="sec-5 tabpanel-sec-5"><span class="sec-tab-icon">📚</span><span class="sec-tab-label">数据来源 + 检索备注</span></button></nav>
+<section id="sec-1" role="tabpanel" aria-labelledby="tab-sec-1" class="brief-section sec-sky" data-sec="1"><header class="sec-head"><span class="sec-icon">🏢</span><span class="sec-num">§1</span><h2 class="sec-title">1. 公司速览</h2><span class="sec-tag">公司速览</span></header><div class="sec-body"><div class="dim-grid"><div class="dim-card" tabindex="0"><div class="dim-key">主营业务</div><div class="dim-val"><strong>集团双引擎</strong>：制药（2025 年收入 476.69 亿瑞郎、+9%，占 77%）+ 诊断（2025 年约 138 亿瑞郎（估算），由各地区加总推算）。制药支柱：肿瘤（2025 年 153 亿瑞郎）、神经科学 98 亿（Ocrevus/Evrysdi）、血液学 86 亿（Hemlibra/Polivy）、免疫 67 亿（Xolair）、眼科 42 亿（Vabysmo 41.02 亿）；2026H1 集团 303.64 亿瑞郎（CER +6%，制药 236.29 亿 +6%、诊断 67.35 亿 +3%）。<strong>中国双实体</strong>：罗氏制药中国（张江端到端全产业链）+ 罗氏诊断中国（IVD 市场领导者）</div><div class="dim-src">罗氏 2025 财报（新浪转述）[5]、21 世纪经济报道 [7]、HY2026 投资者材料 [10]</div></div><div class="dim-card" tabindex="0"><div class="dim-key">商业模式</div><div class="dim-val">创新药研发-商业化（专利药 + 下一代管线：双抗/ADC/减重 3 期管线 enicepatide、CT-996 等）+ 诊断仪器-试剂耗材绑定模式（AXELIOS 1 测序平台 2026-06 上市）；诊断与制药协同做&quot;个体化医疗&quot;（伴随诊断）。在华模式 = 端到端本土化：研发（创新中心）→ 生产（张江基地 + 苏州基地）→ 商保/医保准入 → 商业化</div><div class="dim-src">HY2026 [10]、罗氏官网 [1]</div></div><div class="dim-card" tabindex="0"><div class="dim-key">主要客户</div><div class="dim-val">全球：医院/实验室/检测中心（诊断）、医疗机构与患者（制药）。中国：全国主要三甲医院肿瘤/眼科/神经科科室、检验科与第三方检测（诊断 IVD 装机存量）；政府准入体系（国家医保谈判——16 款创新药已入医保目录）；2025-11 与阿里健康深化合作（流感季&quot;健康出行&quot;公益行动，联动飞猪/高德在订票/导航场景嵌入流感防护）</div><div class="dim-src">罗氏官网 [1]、经济参考报 [6]</div></div><div class="dim-card" tabindex="0"><div class="dim-key">行业地位</div><div class="dim-val">全球 IVD 市场领导者（罗氏诊断）；全球最大生物制药公司之一，2025 年集团销售 615.16 亿瑞郎（+7%）创纪录；制药单业务 2025 年约 576 亿美元；跨国药企在华端到端全产业链标杆（首家入驻张江的跨国药企、首家在华实现大分子抗体生物药本地化生产的跨国药企）</div><div class="dim-src">新浪财经 [5]、健康界 [8]、罗氏官网 [1]</div></div></div></div></section><section id="sec-2" role="tabpanel" aria-labelledby="tab-sec-2" class="brief-section sec-olive inactive" data-sec="2"><header class="sec-head"><span class="sec-icon">👥</span><span class="sec-num">§2</span><h2 class="sec-title">2. 组织与股权</h2><span class="sec-tag">组织与股权</span></header><div class="sec-body"><div class="dim-grid"><div class="dim-card gov" tabindex="0"><div class="dim-key"><span class="dim-group">治理</span>创始人 / CEO</div><div class="dim-val">创始人：Fritz Hoffmann-La Roche（1896，巴塞尔）。集团 CEO：<strong>Thomas Schinecker</strong>（2023-03 起）。董事会主席：<strong>Severin Schwan</strong>（2026-03-10 年度股东大会以 97.75% 得票率连任，原集团 CEO）。制药业务 CEO：Teresa Graham；诊断业务 CEO：Matt Sause</div><div class="dim-src">Roche 官网治理页 [3]、AGM 2026 公告 [4]</div></div><div class="dim-card gov" tabindex="0"><div class="dim-key"><span class="dim-group">治理</span>关键高管</div><div class="dim-val">CFO：Alan Hippe；<strong>首席数字与技术官 CDTO：Wafaa Mamilli</strong>（2025-02-10 上任，向集团 CEO 汇报，统管原 CFO 名下的全球 IT + 数字化/AI——<strong>云/AI 合作的对口决策层</strong>）；pRED 负责人 Mark Dawson（2026 新任）；中国区：罗氏制药中国总裁<strong>边欣</strong>（2025《财富》中国最具影响力商界女性；公开倡导&quot;以数字化重塑医疗未来&quot;）；罗氏中国创新中心负责人沈宏、罗氏中国加速器负责人唐秋嵩</div><div class="dim-src">Roche 官网 [3]、CIO.com 专访 [9]、新华网 [2]、中国新闻周刊 [12]</div></div><div class="dim-card" tabindex="0"><div class="dim-key"><span class="dim-group">组织</span>总部</div><div class="dim-val">集团：瑞士巴塞尔（Grenzacherstrasse）。中国：罗氏制药中国区总部 = <strong>上海浦东张江高科技园区</strong>（1994 年首家入驻张江的跨国企业；龙东大道 688 弄园区含总部、生产基地、创新中心/加速器）；罗氏诊断中国总部亦在上海；苏州工业园区设诊断亚太生产基地与研发中心；全球药品开发中国中心在上海+北京（300+ 人）</div><div class="dim-src">罗氏官网 [1]、解放日报/上海政府网 [14]、roche-diagnostics.cn [15]</div></div><div class="dim-card" tabindex="0"><div class="dim-key"><span class="dim-group">组织</span>员工规模</div><div class="dim-val">集团：<strong>约 10 万人级</strong>（2023 年口径 103,000+，罗氏集团官方中文手册；2025 精确数 🚫 未在本次检索中核实）。中国：<strong>近 5,000 名</strong>（罗氏官方中文手册 2024-03 口径，&quot;在中国拥有近 5,000 名员工&quot;；其中科研人员 600+、90% 以上本土科学家；罗氏诊断苏州基地单点 600+ 人）</div><div class="dim-src">罗氏集团中文手册 PDF [13]、 careers.roche.com [16]</div></div><div class="dim-card cap" tabindex="0"><div class="dim-key"><span class="dim-group">资本</span>股权结构</div><div class="dim-val"><strong>双重股权</strong>：投票权股 = 记名不记名 bearer shares（仅约 13% 经济占比、掌握全部投票权）+ 非投票权参与凭证 Genussscheine（占经济权益大头，机构投资者广泛持有）。<strong>Hoffmann-Oeri 创始家族池持 69,318,000 股 bearer shares = 64.97% 投票权</strong>（截至 2025-12-31，pooling agreement 自 1948 年延续、2009 年无限期延长——重大战略不可被外部股东强推）；池外 Maja Oeri、Melchior Oeri 各持 3.79%。前主席 Franz Humer 名下 Genussscheine 转让给家族基金会（Covidien 前主席 2025 年 5 月消息，次要）</div><div class="dim-src">Grokipedia/Roche 披露转述 [11]、法律信息聚合 [17]</div></div><div class="dim-card cap" tabindex="0"><div class="dim-key"><span class="dim-group">资本</span>主要股东</div><div class="dim-val">创始家族池（Hoffmann/Oeri/Duschmalé 家族成员 + Wolf 慈善基金会 + Artuma Holding LLC，含董事会副主席 André Hoffmann 为家族代表）；公众/机构（BlackRock、Vanguard 等持 Genussscheine）。历史上 Novartis 曾持 33% Genussscheine，2021 年回购完成后已退出</div><div class="dim-src">legalclarity 聚合 [17]、grokipedia [11]</div></div></div><div class="quote-banner q-clay"><span class="q-icon">⚡</span><div class="q-body">⚡ <strong>治理要点</strong>：家族超级投票权（64.97%）+ 双重股权 = 集团战略极稳定，但决策链条&quot;瑞士总部→两大业务→中国区&quot;层级分明；中国区自主权集中在<strong>边欣</strong>（制药）与罗氏诊断中国管理层，而<strong>数字化/AI 预算与全球 IT 基础设施</strong>由集团 CDTO Wafaa Mamilli 垂直统管——云厂商切入点应同时挂&quot;中国本土场景（边欣/诊断中国）+ 全球数字底座标准（Mamilli 体系）&quot;两条线。</div></div></div></section><section id="sec-3" role="tabpanel" aria-labelledby="tab-sec-3" class="brief-section sec-rust inactive" data-sec="3"><header class="sec-head"><span class="sec-icon">📰</span><span class="sec-num">§3</span><h2 class="sec-title">3. 近期动态(近 6 个月)</h2><span class="sec-tag">近期动态</span></header><div class="sec-body"><div class="timeline"><div class="tl-item" tabindex="0"><div class="tl-date">2026-03-10</div><div class="tl-cat cat-gray500">资本/治理</div><div class="tl-event">年度股东大会：Severin Schwan 连任董事会主席；<strong>连续第 39 年提高分红</strong>至每股 9.80 瑞郎；批准 Genussscheine 与 Participation Certificates 的互换（资本工具整合）；Lubomira Rochet（前欧莱雅首席数字官）新进董事会——董事会对数字化的关注度上升</div><div class="tl-src">Roche AGM 官方公告 [4]</div></div><div class="tl-item" tabindex="0"><div class="tl-date">2026-03-16</div><div class="tl-cat cat-sky">AI/数字</div><div class="tl-event"><strong>罗氏发布 NVIDIA "AI 工厂"</strong>：在美欧新增 NVIDIA 高性能算力基础设施，Lab-in-the-Loop 模式连接实验室与 AI 模型，覆盖研发-开发-制造-商业化全价值链（2023 年起战略合作的下一阶段）；CDTO Mamilli 亲自站台。罗氏同时运营企业级 AI 平台 <strong>Galileo</strong>（内部 GenAI 工具/合规沙盒）、制造业数字孪生（研发周期缩短 2-4 倍、技术转移时间 -50%）</div><div class="tl-src">Roche 官方新闻 [18]、CIO.com [9]</div></div><div class="tl-item" tabindex="0"><div class="tl-date">2026-07-23</div><div class="tl-cat cat-gray500">财报</div><div class="tl-event">2026 半年报：集团销售 303.64 亿瑞郎（CER +6%，瑞郎计价 -2% 汇率拖累）；制药 236.29 亿（CER +6%）、诊断 67.35 亿（CER +3%）；核心营业利润 +10%、核心 EPS +9%；研发投入 57.65 亿瑞郎（占营收 19%，跨国药企领先）。<strong>中国区承压：制药受 2025 流感季高基数拖累、诊断受医疗定价改革影响仍在下滑</strong></div><div class="tl-src">21 世纪经济报道 [7]、HY2026 投资者材料 [10]</div></div><div class="tl-item" tabindex="0"><div class="tl-date">2026-Q2</div><div class="tl-cat cat-sky">合作/并购</div><div class="tl-event">收购 <strong>PathAI</strong>（AI 驱动病理诊断，&quot;transform AI-driven diagnostics&quot;，待交割）；与 Nurix 合作 BTK 降解剂 bexobrutideg——AI 病理+数字化诊断成为集团 BD 主航道</div><div class="tl-src">HY2026 投资者材料 [10]</div></div><div class="tl-item" tabindex="0"><div class="tl-date">2026-06</div><div class="tl-cat cat-clay">产品</div><div class="tl-event">诊断新一代测序平台 <strong>AXELIOS 1</strong> 上市；Elecsys pTau217（阿尔茨海默血液检测）、Elecsys IGRA TB、cobas HDV 获 CE 标志</div><div class="tl-src">HY2026 投资者材料 [10]</div></div><div class="tl-item" tabindex="0"><div class="tl-date">2026-08</div><div class="tl-cat cat-sky">合作（中国）</div><div class="tl-event">罗氏中国加速器入选 2025 世界人工智能大会&quot;AI+医健&quot;可持续创新案例榜（2025-07 WAIC 发布）；加速器已汇聚 <strong>20+ 家本土成员企业</strong>（从 450+ 申请者中筛出）、与罗氏中国创新中心达成 10+ 项早期研发合作，筛选标准明确包含&quot;AI 与机器学习应用&quot;</div><div class="tl-src">网易/健闻咨询 [19]、罗氏官网 [1]</div></div><div class="tl-item" tabindex="0"><div class="tl-date">2026-02</div><div class="tl-cat cat-gray500">中国区</div><div class="tl-event">罗氏制药中国总裁边欣接受经济观察网专访《在变局中加码创新》：2025 年至今罗氏与中国本土创新药企达成 <strong>5 项全球合作</strong>；集采常态化下&quot;将进入集采的原研药交给合作伙伴推广、资源集中于创新药&quot;的在华策略表述</div><div class="tl-src">经济观察网 [12]</div></div><div class="tl-item" tabindex="0"><div class="tl-date">持续</div><div class="tl-cat cat-gray500">中国布局</div><div class="tl-event">张江新生物药基地（投资 20.4 亿元，2025-05 启动，2029 落成/2031 投产，首个产品罗视佳®本地化）推进中；罗氏诊断亚太生产与研发基地扩建（2024 签约）推进中</div><div class="tl-src">上海市政府/解放日报 [14]、罗氏官网 [1]</div></div></div><div class="quote-banner q-rust"><span class="q-icon">🚫</span><div class="q-body">🚫 <strong>注</strong>：罗氏 2026 年 8-9 月（近 6 个月窗口末段）在华新签约/新公开发布 🚫 未在公开渠道检索到新增重大事件；上表&quot;持续&quot;项为 2025 年启动、仍在执行期的长周期项目，非本窗口新事件。</div></div></div></section><section id="sec-4" role="tabpanel" aria-labelledby="tab-sec-4" class="brief-section sec-clay inactive" data-sec="4"><header class="sec-head"><span class="sec-icon">⚡</span><span class="sec-num">§4</span><h2 class="sec-title">⚡ 4. 拜访要点 3 条</h2><span class="sec-tag">拜访要点</span></header><div class="sec-body"><ol class="visit-list"><li class="visit-card"><div class="visit-num">01</div><div class="visit-body"><div class="visit-title"><strong>AI/数字化是罗氏集团当前最高优先级之一，且中国区有明确本土抓手——把会议从"IT 采购"拉到"AI 场景共创"</strong>：集团层面，CDTO Wafaa Mamilli（2025-02 上任、直接向 CEO 汇报）正推行&quot;AI 工厂 + Galileo 企业 AI 平台 + 数字孪生&quot;体系，2026-03 刚发布 NVIDIA 算力合作，2026-Q2 收购 PathAI 布局 AI 病理；中国层面，边欣公开主张&quot;以数字化重塑医疗未来&quot;，罗氏中国加速器把&quot;AI 与机器学习应用&quot;写进成员筛选标准、本土成员企业 20+ 家。会议若出现 solution architecture 背景（Richard Zhang）的参会人，可主动切：合规安全的 GenAI 企业底座（对标 Galileo 的本土合规版）、AI 病理/影像算力、研发仿真与临床试验数据平台。钩子数据：NVIDIA AI 工厂、Galileo、数字孪生（研发周期缩短 2-4 倍）。</div></div></li><li class="visit-card"><div class="visit-num">02</div><div class="visit-body"><div class="visit-title"><strong>罗氏诊断中国是"承压转型"一侧，数字化是他们的解药而非可选项</strong>：2025 年中国诊断业务从 24.02 亿瑞郎跌至 17.26 亿瑞郎（-24%，IVD 集采 + 医疗定价改革），2026H1 仍在下滑但跌幅收窄——诊断中国正需要用数字化（检验科智慧实验室、LIS/数据服务、设备远程运维、AI 辅助报告）在&quot;以价换量&quot;失灵后寻找第二曲线。同时罗氏诊断苏州基地 600+ 人、亚太基地扩建推进中，智慧工厂/供应链数字化的云需求真实存在。切磋点：IVD 集采后时代实验室数字化方案与设备物联数据上云。</div></div></li><li class="visit-card"><div class="visit-num">03</div><div class="visit-body"><div class="visit-title"><strong>对"出行"团队：阿里健康×罗氏的"流感季健康出行"合作是现成的锚点，先谈场景再谈云</strong>：2025-11 进博会上，罗氏制药中国与阿里健康发起&quot;阻断流感，福泽万家&quot;行动，阿里健康联动<strong>飞猪、高德</strong>在订票、导航、出行节点嵌入流感风险提示——罗氏中国已经认可&quot;出行场景 = 疫病防护触点&quot;的逻辑，且贵司出行数据能力正是这一逻辑的自然延伸（高德/飞猪模式之外的自有出行网络）。可提：出行热力/人流数据（合规脱敏后）在流行病早期预警、药械可及性、患者随访场景的应用；顺带引出数据合规基础设施（数据安全法/个保法框架下的云端协作区）需求。切记：本场是技术/方案会，不要谈药品 BD。</div></div></li></ol></div></section><section id="sec-5" role="tabpanel" aria-labelledby="tab-sec-5" class="brief-section sec-gray500 inactive" data-sec="5"><header class="sec-head"><span class="sec-icon">📚</span><span class="sec-num">§5</span><h2 class="sec-title">5. 数据来源 + 检索备注</h2><span class="sec-tag">数据来源</span></header><div class="sec-body"><h3 class="sub-head">已使用来源(13 条，独立)</h3><ul class="md-list"><li>[1] <a class="md-link" href="https://www.roche.com.cn/about/roche-china" target="_blank" rel="noopener">罗氏制药中国官网（关于/研发创新/创新中心）<span class="md-link-domain"> · roche.com.cn</span></a> — Tier 1：在华产业链、28 款产品、16 款医保、张江全产业链、加速器 20+ 成员企业、与 5 家本土药企全球授权</li><li>[2] <a class="md-link" href="http://www.news.cn/digital/20250612/60f4de1e08be49e48e1051cddd57bef4/c.html" target="_blank" rel="noopener">新华网：数智健康领航人物｜罗氏制药中国总裁边欣：以数字化重塑医疗未来（2025-06）<span class="md-link-domain"> · news.cn</span></a> — Tier 2：中国区一把手数字化主张</li><li>[3] <a class="md-link" href="https://www.roche.com/about/governance/executive-committee" target="_blank" rel="noopener">Roche 官网 Executive Committee / Board of Directors / CEO 页<span class="md-link-domain"> · roche.com</span></a> — Tier 1：Schinecker/Graham/Sause/Hippe/Mamilli/Dawson 任期与分工</li><li>[4] <a class="md-link" href="https://www.roche.com/investors/updates/inv-update-2026-03-10" target="_blank" rel="noopener">Roche Annual General Meeting 2026 官方公告（2026-03-10）<span class="md-link-domain"> · roche.com</span></a> — Tier 1/Tier 7：Schwan 连任、39 年连续加息分红、资本工具整合</li><li>[5] <a class="md-link" href="https://finance.sina.com.cn/roll/2026-01-30/doc-inhkacxp3713301.shtml" target="_blank" rel="noopener">新浪财经：罗氏 2025 年财报（2026-01-30，转引&quot;求实药社&quot;）<span class="md-link-domain"> · finance.sina.com.cn</span></a> — Tier 7：全年 615.16 亿瑞郎（+7%）、制药 476.69 亿（+9%）、中国区 30.34 亿瑞郎（+10%）、疾病领域拆分</li><li>[6] <a class="md-link" href="http://jjckb.xinhuanet.com/20251107/ad55f242856949468425f1469ce2bfd0/c.html" target="_blank" rel="noopener">经济参考报：阿里健康与罗氏制药深化合作 共筑流感季健康出行数字化防线（2025-11-07）<span class="md-link-domain"> · jjckb.xinhuanet.com</span></a> — Tier 2：出行场景合作锚点（飞猪/高德联动）</li><li>[7] <a class="md-link" href="https://m.21jingji.com/article/20260723/herald/430328a0c64bde07d2206ce2f9afc505_zaker.html" target="_blank" rel="noopener">21 世纪经济报道：罗氏半年考（2026-07-23）<span class="md-link-domain"> · m.21jingji.com</span></a> — Tier 2：2026H1 集团/制药/诊断、中国区制药与诊断双双下滑及原因、研发占比 19%</li><li>[8] <a class="md-link" href="https://www.healthoo.com/A9/202602/A9_20260205142147_620703.asp" target="_blank" rel="noopener">健康界：罗氏公布 2025 年业绩（2026-02-05）<span class="md-link-domain"> · healthoo.com</span></a> — Tier 2：2025 全年 615 亿瑞郎交叉验证</li><li>[9] <a class="md-link" href="https://www.cio.com/article/4221996/how-roche-drives-ai-outcomes-in-a-changing-world.html" target="_blank" rel="noopener">CIO.com：How Roche drives AI outcomes（2026-09-16 专访 Mamilli）<span class="md-link-domain"> · cio.com</span></a> — Tier 2：Galileo 平台、Kidney Klinrisk、数字病理、数字孪生（-2~4 倍研发周期、技术转移 -50%）、员工 AI upskill 三层框架</li><li>[10] <a class="md-link" href="https://assets.roche.com/f/176343/x/d465dc5712/irp260723-a.pdf" target="_blank" rel="noopener">Roche HY 2026 投资者演示 PDF（2026-07-23）<span class="md-link-domain"> · assets.roche.com</span></a> — Tier 1/Tier 7：HY2026 分部数据、PathAI 收购、AXELIOS 1、Nurix 合作、中国定价改革拖累诊断</li><li>[11] <a class="md-link" href="https://grokipedia.com/page/Roche" target="_blank" rel="noopener">Grokipedia: Roche（股权结构条目，转引 Roche 披露）<span class="md-link-domain"> · grokipedia.com</span></a> — Tier 7：bearer/Genussscheine 双层结构、家族池 69,318,000 股 = 64.97%（2025-12-31）、Maja/Melchior Oeri 池外 3.79%</li><li>[12] <a class="md-link" href="http://www.inewsweek.cn/people/2026-01-07/28449.shtml" target="_blank" rel="noopener">中国新闻周刊：边欣——将可能变为现实的乐观主义者（2026-01-07）<span class="md-link-domain"> · inewsweek.cn</span></a> 与 <a class="md-link" href="http://www.eeo.com.cn/2026/0213/794391.shtml" target="_blank" rel="noopener">经济观察网：边欣在变局中加码创新（2026-02-13）<span class="md-link-domain"> · eeo.com.cn</span></a> — Tier 2：边欣 AI 主张、本土平台自建资金、5 项全球合作、集采应对策略</li><li>[13] <a class="md-link" href="https://assets.roche.com/f/249469/x/496e06a823/companybrochure_202403.pdf" target="_blank" rel="noopener">罗氏集团中文手册 PDF（2024-03）<span class="md-link-domain"> · assets.roche.com</span></a> — Tier 1：全球 103,000+ 员工、中国近 5,000 名员工、600+ 科研人员、加速器与创新中心细节</li></ul><h3 class="sub-head">阻塞 / 未覆盖</h3><ul class="md-list"><li>🚫 <strong>会址 "The Square City"（上海）</strong>：三轮检索（web_search 中英 + Baidu 引号精确搜索）均未命中该楼宇的公开信息——The Square 是 Hines 旗下灵活办公品牌（但上海不在其公开站点列出的城市中），&quot;Square City&quot; 作为独立楼宇或 Hines 上海项目均无法核实。<strong>建议：会前向邀请方（Richard Zhang）直接确认楼宇地址与楼层，勿按名称猜位置</strong>。</li><li>🚫 <strong>Roche 集团 2025 年精确员工数</strong>：仅获 2023 年口径 103,000+（官方中文手册），2025 年报精确值未在本次检索窗口内取得（Roche 年报 PDF 未直接抓取）。</li><li>🚫 <strong>罗氏中国 2025/2026 精确员工数</strong>：仅获 2024-03 官方手册口径&quot;近 5,000 名&quot;；脉脉/LinkedIn 未登录不可抓取，未交叉验证。</li><li>🚫 <strong>诊断业务 2025 全年精确值（138 亿瑞郎）</strong>：由全球分地区数据加总推算，标注（估算）。</li><li>🚫 <strong>参会 4+2 人（Richard Zhang/Pei Jia/Xin Liu/Zhixiang Wu，及 HR Lilian Liu、外包 Liam Guo）的职级与汇报线</strong>：LinkedIn 未登录不可抓取；仅 Richard Zhang 的 solution architecture 职能为邀请方标注，其余未核实——<strong>会上宜先交换名片校准角色再谈方案深度</strong>。</li><li>🚫 Tier 6 公共情绪（小红书/知乎/脉脉近 30 天罗氏员工舆情）— 未登录环境不可抓取，跳过。</li></ul><h3 class="sub-head">信心标签</h3><ul class="md-list"><li>核心事实（业务结构/中国布局/组织框架）：<strong>高</strong> — 罗氏官网、HY2026 投资者材料、上海市政府/解放日报多源一致</li><li>财务：<strong>高</strong> — 2025 全年与 2026H1 数据均有财报口径来源且两源交叉（新浪转述 + 21 世纪经济报道 + Roche 官方 PDF）；中国区承压结论来自 21 世纪经济报道财报解读</li><li>组织与股权：<strong>中高</strong> — 高管名单为官网一手；家族池 64.97% 投票权来自对 Roche 披露的聚合转述（非年报 PDF 原文），方向上多源一致但精确到 2025-12-31 的数字为二手聚合</li><li>近期动态（6 个月窗口）：<strong>中高</strong> — AGM/AI 工厂/HY 财报/PathAI 均有一手或准一手来源；中国区 2026 年 8-9 月增量信息缺失已用 🚫 标注</li></ul></div></section>
+</main>
+
+<footer class="brief-foot">
+  <p>本简报由 Hermes Agent <code>customer-pre-brief</code> skill 自动生成 · 7 天有效期 · 适合销售/BD 拜访前 5 分钟速读</p>
+  <p class="muted">Generated at 2026-09-28 · 视觉与索引站保持一致</p>
+</footer>
+
+</div>
+<noscript>
+  <style>
+    /* 无 JS 时: 隐藏顶部 tab 条, 强制所有章节显示 (退化到 v2 行为) */
+    .sec-tabs { display: none !important; }
+    .brief-section.inactive { display: block !important; }
+  </style>
+</noscript>
+<script>
+// ============= SPA 章节切换 + URL hash 路由 + 双重入口联动 =============
+(function(){
+  const sections = Array.from(document.querySelectorAll('.brief-section'));
+  const tabs = Array.from(document.querySelectorAll('.sec-tab'));
+  const tocLinks = Array.from(document.querySelectorAll('.toc-rail a, .sidebar-toc a'));
+  const firstId = sections.length ? sections[0].id : 'sec-1';
+
+  function showSection(secId){
+    secId = secId || firstId;
+    // 找不到目标时回落第一章节
+    if (!document.getElementById(secId)) secId = firstId;
+
+    // 1. 切 section 显示
+    sections.forEach(s => {
+      if (s.id === secId) {
+        s.classList.remove('inactive');
+        s.setAttribute('aria-hidden', 'false');
+      } else {
+        s.classList.add('inactive');
+        s.setAttribute('aria-hidden', 'true');
+      }
+    });
+
+    // 2. 切顶部 tab 激活态 + aria-selected
+    tabs.forEach(t => {
+      const isActive = t.dataset.target === secId;
+      t.classList.toggle('active', isActive);
+      t.setAttribute('aria-selected', isActive ? 'true' : 'false');
+      t.setAttribute('tabindex', isActive ? '0' : '-1');
+    });
+
+    // 3. 切左/右 TOC anchor 激活态 + aria-current
+    const hash = '#' + secId;
+    tocLinks.forEach(a => {
+      const isActive = a.getAttribute('href') === hash;
+      a.classList.toggle('active', isActive);
+      if (isActive) a.setAttribute('aria-current', 'location');
+      else a.removeAttribute('aria-current');
+    });
+
+    // 4. 同步 URL hash (用 replaceState 避免污染历史)
+    if (location.hash !== hash) {
+      try { history.replaceState(null, '', hash); } catch (e) { location.hash = hash; }
+    }
+
+    // 5. SPA 模式下把目标 section 滚到顶 (左侧 sidebar 旁能看到), 仅在 section 距顶部较远时
+    const target = document.getElementById(secId);
+    if (target) {
+      const rect = target.getBoundingClientRect();
+      // 只在 main 已滚动过 / 目标不在可视区内时滚动, 避免初次加载跳动
+      if (Math.abs(rect.top) > 120) {
+        target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    }
+  }
+
+  // ---- 顶部 tab 点击 ----
+  tabs.forEach(btn => {
+    btn.addEventListener('click', () => showSection(btn.dataset.target));
+  });
+
+  // ---- 左/右 sidebar TOC 点击 ----
+  tocLinks.forEach(a => {
+    a.addEventListener('click', e => {
+      const href = a.getAttribute('href') || '';
+      if (!href.startsWith('#')) return;
+      e.preventDefault();
+      const secId = href.slice(1);
+      showSection(secId);
+    });
+  });
+
+  // ---- URL hash 变化 (前进/后退 / 手动改) ----
+  window.addEventListener('hashchange', () => {
+    showSection((location.hash || '').replace('#', '') || firstId);
+  });
+
+  // ---- 键盘左右切换 (在 tab 上按 ←/→/Home/End) ----
+  tabs.forEach((tab, idx) => {
+    tab.addEventListener('keydown', e => {
+      let next = null;
+      if (e.key === 'ArrowRight') next = tabs[(idx + 1) % tabs.length];
+      else if (e.key === 'ArrowLeft') next = tabs[(idx - 1 + tabs.length) % tabs.length];
+      else if (e.key === 'Home') next = tabs[0];
+      else if (e.key === 'End') next = tabs[tabs.length - 1];
+      if (next) {
+        e.preventDefault();
+        next.focus();
+        showSection(next.dataset.target);
+      }
+    });
+  });
+
+  // ---- 初始: 读 URL hash, 否则第一章节 ----
+  const initial = (location.hash || '').replace('#', '') || firstId;
+  showSection(initial);
+})();
+</script>
+</body>
+</html>
